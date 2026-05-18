@@ -20,9 +20,6 @@ block content %}
             >
         </li>
         <li>
-            <a href="#consejos-para-la-terminal">Consejos para la Terminal</a>
-        </li>
-        <li>
             <a href="#select">SELECT</a>
             <ul>
                 <li><a href="#preguntas-1">Preguntas</a></li>
@@ -249,53 +246,36 @@ block content %}
     <h2>Primeros Pasos con PostgreSQL</h2>
     <ul>
         <li>
-            Vale la pena notar que PostgreSQL es un sistema de base de datos
-            robusto utilizado en muchas aplicaciones incluyendo sitios web,
-            aplicaciones empresariales y sistemas de analisis de datos.
+            PostgreSQL es un sistema de base de datos robusto utilizado en
+            aplicaciones web, empresariales y de analisis de datos.
         </li>
         <li>
-            Ahora, consideremos una base de datos de libros que han estado en la
-            lista larga del International Booker Prize. Cada ano, hay 13 libros
-            en la lista larga y nuestra base de datos contiene 5 anos de estas
-            listas largas.
+            Para este curso usamos <strong>Neon</strong>, una plataforma de
+            PostgreSQL en la nube con capa gratuita. Esto evita tener que
+            instalar y configurar PostgreSQL localmente: la base de datos ya
+            esta lista y accesible desde cualquier lugar.
         </li>
         <li>
-            Antes de comenzar a interactuar con esta base de datos:
+            Nuestra base de datos contiene libros que han estado en la lista
+            larga del International Booker Prize. Cada ano hay 13 libros
+            nominados y tenemos 5 anos de listas largas, ademas de
+            puntuaciones, autores, editoriales y traductores.
+        </li>
+        <li>
+            Para interactuar con la base de datos puedes usar:
             <ul>
                 <li>
-                    Inicia sesion en Visual Studio Code for CS50. Aqui es donde
-                    escribiremos codigo y editaremos archivos.
+                    La <strong>consola SQL</strong> integrada en esta aplicacion
+                    web (pestana Consola).
                 </li>
                 <li>
-                    El entorno PostgreSQL ya esta configurado en tu sistema.
-                    Accede a el mediante la terminal con <code>psql</code>.
+                    O cualquier cliente PostgreSQL como
+                    <code>psql</code>, DBeaver, pgAdmin, etc.
                 </li>
             </ul>
         </li>
     </ul>
-    <hr />
-    <h2>Consejos para la Terminal</h2>
-    <p>
-        Aqui hay algunos consejos utiles para escribir codigo SQL en la
-        terminal.
-    </p>
-    <ul>
-        <li>Para limpiar la pantalla de la terminal, presiona Ctrl + L.</li>
-        <li>
-            Para obtener la instruccion(es) ejecutada(s) previamente en la
-            terminal, presiona la tecla Flecha hacia Arriba.
-        </li>
-        <li>
-            Si tu consulta SQL es demasiado larga y se envuelve en la terminal,
-            puedes presionar enter y continuar escribiendo la consulta en la
-            siguiente linea.
-        </li>
-        <li>
-            Para salir de una base de datos o del entorno psql, usa
-            <code>\q</code>.
-        </li>
-    </ul>
-    <hr />
+
     <h2>SELECT</h2>
     <ul>
         <li>
