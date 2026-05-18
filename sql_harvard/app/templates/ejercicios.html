@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Ejercicios Clase {{ clase_num }} — CS50 SQL{% endblock %}
+{% block content %}
+<h1>Ejercicios — Clase {{ clase_num }}: {{ clase_titulo }}</h1>
+
+<div class="ejercicios-barra">
+    <p>
+        {{ ejercicios | length }} ejercicios para practicar.
+        Escribe cada consulta en la <a href="/consola">consola SQL</a>.
+    </p>
+    <a href="/ejercicios/clase{{ clase_num }}/respuestas" class="boton-barra">
+        Ver hoja de respuestas
+    </a>
+</div>
+
+{% for e in ejercicios %}
+<div class="card card-{{ e.dificultad }}" id="{{ e.id }}">
+    <div class="ejercicio-card">
+        <h3>{{ e.numero }}. {{ e.titulo }}</h3>
+        <span class="badge badge-{{ e.dificultad }}">{{ e.dificultad }}</span>
+    </div>
+    <p class="ejercicio-enunciado">{{ e.enunciado }}</p>
+</div>
+{% endfor %}
+
+<div class="boton-centro">
+    <a href="/ejercicios/clase{{ clase_num }}/respuestas" class="boton-secundario">
+        Ver hoja de respuestas
+    </a>
+</div>
+{% endblock %}
