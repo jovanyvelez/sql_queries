@@ -23,6 +23,15 @@ La aplicacion incluye:
 | CSS | Un solo archivo, modo oscuro |
 | Diagramas | Mermaid.js |
 
+## Base de datos
+
+El archivo `datos.sql` contiene el esquema completo y los datos de las 10 tablas
+(listo para importar en cualquier PostgreSQL >= 15):
+
+```bash
+psql -U tu_usuario -d tu_base < datos.sql
+```
+
 ## Ejecutar localmente
 
 ```bash
