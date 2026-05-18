@@ -6,9 +6,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.services.keep_alive import mantener_base_de_datos_viva
-from app.templating import templates
-from app.routers import clases, ejercicios, consola
+from services.keep_alive import mantener_base_de_datos_viva
+from templating import templates
+from routers import clases, ejercicios, consola
 
 
 # La capa gratuita de Neon suspende la base de datos tras inactividad.

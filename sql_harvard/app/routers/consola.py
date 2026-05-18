@@ -5,9 +5,9 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
-from app.services.validador_sql import validar_consulta
-from app.templating import templates
+from database import get_db
+from services.validador_sql import validar_consulta
+from templating import templates
 
 router = APIRouter()
 

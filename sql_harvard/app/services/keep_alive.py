@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import AsyncSessionLocal
+from database import AsyncSessionLocal
 
 logger = logging.getLogger("uvicorn")
 
