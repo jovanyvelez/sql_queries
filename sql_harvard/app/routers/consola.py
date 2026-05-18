@@ -6,6 +6,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
+from app.services.rate_limit import limitar_consulta
 from app.services.validador_sql import validar_consulta
 from app.templating import templates
 
@@ -25,6 +26,7 @@ async def ejecutar_consulta_usuario(
     request: Request,
     db: AsyncSession = Depends(get_db),
     sql: str = Form(""),
+    _rate: None = Depends(limitar_consulta),
 ):
     if not sql.strip():
         return templates.TemplateResponse(request, "consola.html", {

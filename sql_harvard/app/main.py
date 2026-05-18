@@ -6,9 +6,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from sqlalchemy import text
 
+from app.database import engine
 from app.services.keep_alive import mantener_base_de_datos_viva
 from app.templating import templates
 from app.routers import clases, ejercicios, consola
@@ -35,3 +37,18 @@ app.include_router(consola.router)
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
+
+
+@app.get("/health")
+async def health():
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return JSONResponse({"status": "ok", "database": "connected"})
+    except Exception:
+        return JSONResponse({"status": "error", "database": "disconnected"}, status_code=503)
+
+
+@app.exception_handler(500)
+async def error_500(request: Request, exc: Exception):
+    return templates.TemplateResponse(request, "500.html", status_code=500)

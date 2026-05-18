@@ -75,7 +75,9 @@ app/
 
 ## Seguridad
 
-La consola SQL solo permite consultas de lectura (`SELECT`, `WITH`, `EXPLAIN`). Las operaciones de escritura (`INSERT`, `UPDATE`, `DELETE`, `DROP`, etc.) estan bloqueadas tanto a nivel de aplicacion como de base de datos (transacciones `READ ONLY`).
+- Solo consultas de lectura (`SELECT`, `WITH`, `EXPLAIN`). Las operaciones de escritura estan bloqueadas a nivel de aplicacion y base de datos (transacciones `READ ONLY`).
+- Rate limiting: maximo 10 consultas por minuto por IP en la consola.
+- Healthcheck: `GET /health` verifica conectividad con la base de datos.
 
 ## Creditos
 
