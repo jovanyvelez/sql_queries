@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %}CS50 SQL{% endblock %}</title>
+        <link rel="stylesheet" href="/static/estilos.css" />
+        {% block extra_css %}{% endblock %}
+    </head>
+    <body>
+        <nav>
+            <a href="/" class="brand">CS50 SQL — PostgreSQL</a>
+            <a href="/clase0">Aprende Queries SQL</a>
+            <a href="/clase1">Aprende Relaciones de tablas SQL</a>
+            <a href="/ejercicios/clase0">Ej. Clase 0</a>
+            <a href="/ejercicios/clase1">Ej. Clase 1</a>
+            <a href="/consola" style="color: #58a6ff">Consola</a>
+        </nav>
+        <div class="container">{% block content %}{% endblock %}</div>
+        {% block extra_js %}{% endblock %}
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        <script>
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: "dark",
+                securityLevel: "loose",
+            });
+        </script>
+    </body>
+</html>

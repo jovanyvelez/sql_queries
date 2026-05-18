@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}CS50 SQL — Inicio{% endblock %}
+{% block content %}
+<h1>CS50 SQL — Adaptacion a PostgreSQL</h1>
+
+<p class="intro">
+    Explora las consultas adaptadas del curso <strong>CS50's Introduction to Databases with SQL</strong>
+    de Harvard, traducidas al espanol y ejecutadas sobre <strong>PostgreSQL</strong>.
+</p>
+
+<div class="toc">
+    <h2>Clases disponibles</h2>
+    <ul>
+        <li><a href="/clase0"><strong>Clase 0: Consultas</strong></a> — SELECT, WHERE, LIKE, ORDER BY, funciones de agregacion</li>
+        <li><a href="/clase1"><strong>Clase 1: Relaciones</strong></a> — Claves, subconsultas, JOIN, conjuntos, GROUP BY</li>
+    </ul>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3>Base de datos: sql_teach</h3></div>
+    <div class="card-body">
+        <table>
+            <tr><th>Tabla</th><th>Filas</th><th>Descripcion</th></tr>
+            <tr><td>editoriales</td><td>33</td><td>Editoriales de libros</td></tr>
+            <tr><td>autores</td><td>72</td><td>Autores</td></tr>
+            <tr><td>traductores</td><td>74</td><td>Traductores</td></tr>
+            <tr><td>libros</td><td>78</td><td>Libros (con FK a editoriales)</td></tr>
+            <tr><td>autoria</td><td>78</td><td>Relacion autores-libros (N:M)</td></tr>
+            <tr><td>traduccion</td><td>87</td><td>Relacion traductores-libros (N:M)</td></tr>
+            <tr><td>puntuaciones</td><td>604.173</td><td>Puntuaciones de libros</td></tr>
+            <tr><td>lista_larga</td><td>78</td><td>Tabla desnormalizada</td></tr>
+            <tr><td>leones_marinos</td><td>6</td><td>Leones marinos</td></tr>
+            <tr><td>migraciones</td><td>8</td><td>Migraciones</td></tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Consola SQL{% endblock %}
+{% block extra_css %}
+<style>
+    .container { max-width: 1200px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="consola-layout">
+    <h1>Consola SQL Interactiva</h1>
+    <p>Escribe y ejecuta consultas SQL directamente contra la base de datos <code>sql_teach</code>. Los resultados se limitan a 50 filas.</p>
+
+    <div class="card">
+        <div class="card-header"><h3>Consulta</h3></div>
+        <div class="card-body">
+            <form method="post" action="/consulta">
+                <textarea name="sql" placeholder="SELECT * FROM lista_larga LIMIT 5;">{{ sql_anterior or '' }}</textarea>
+                <div class="btn-row">
+                    <button type="submit">Ejecutar (Ctrl+Enter)</button>
+                    <button type="button" onclick="window.location='/consola'" class="btn-secondary">Limpiar</button>
+                </div>
+            </form>
+            {% if ayuda %}
+                <p class="help">Hint: usa {{ ayuda }} para pasar parametros. Ej: <code>SELECT * FROM libros WHERE titulo = :titulo</code></p>
+            {% endif %}
+            {% if error %}
+                <div class="error-box">{{ error }}</div>
+            {% endif %}
+            {% if resultado is not none %}
+                <h2>Resultado ({{ resultado | length }} filas)</h2>
+                {% if resultado | length == 0 %}
+                    <p class="empty">La consulta no devolvio filas.</p>
+                {% elif resultado[0].get('mensaje') %}
+                    <div class="info-box">{{ resultado[0].mensaje }}</div>
+                {% else %}
+                    <table>
+                        <tr>
+                            {% for col in resultado[0].keys() %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                        {% for fila in resultado %}
+                        <tr>
+                            {% for val in fila.values() %}
+                                <td>{{ val }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </table>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    document.querySelector('textarea').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            this.form.submit();
+        }
+    });
+</script>
+{% endblock %}

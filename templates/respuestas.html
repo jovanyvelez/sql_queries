@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Respuestas Clase {{ clase_num }} — CS50 SQL{% endblock %}
+{% block content %}
+<h1>Hoja de Respuestas — Clase {{ clase_num }}: {{ clase_titulo }}</h1>
+
+<div class="advertencia">
+    <strong>Antes de mirar:</strong> intenta resolver cada ejercicio por tu cuenta
+    durante al menos 5-10 minutos. La practica activa genera mas aprendizaje que
+    leer soluciones pasivamente.
+</div>
+
+{% for e in ejercicios %}
+<div class="card card-{{ e.dificultad }}" id="{{ e.id }}">
+    <h3>{{ e.numero }}. {{ e.titulo }}
+        <span class="badge badge-{{ e.dificultad }}">{{ e.dificultad }}</span>
+    </h3>
+    <p class="ejercicio-enunciado">{{ e.enunciado }}</p>
+    <pre class="respuesta-sql">{{ e.sql }}</pre>
+</div>
+{% endfor %}
+
+<div class="boton-centro">
+    <a href="/ejercicios/clase{{ clase_num }}" class="boton-secundario">
+        Volver a los ejercicios
+    </a>
+</div>
+{% endblock %}
