@@ -1,14 +1,17 @@
 import asyncio
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
-from services.keep_alive import mantener_base_de_datos_viva
-from templating import templates
-from routers import clases, ejercicios, consola
+from app.services.keep_alive import mantener_base_de_datos_viva
+from app.templating import templates
+from app.routers import clases, ejercicios, consola
 
 
 # La capa gratuita de Neon suspende la base de datos tras inactividad.
