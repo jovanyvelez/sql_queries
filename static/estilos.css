@@ -643,6 +643,17 @@ h2 {
 
 .respuesta-sql {
     margin-top: 0.75rem;
+    background: #0d1117;
+    color: #e6edf3;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    font-family: "Consolas", "Monaco", "Courier New", monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
 }
 
 .intro {
