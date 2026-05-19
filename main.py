@@ -42,6 +42,38 @@ async def index(request: Request):
     return templates.TemplateResponse(request, "index.html")
 
 
+@app.get("/tablas", response_class=HTMLResponse)
+async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
+    filas = await db.execute(
+        text(
+            "SELECT table_name, column_name, data_type, is_nullable,"
+            " column_default, ordinal_position "
+            "FROM information_schema.columns "
+            "WHERE table_schema = 'public' "
+            "ORDER BY table_name, ordinal_position"
+        )
+    )
+    columnas = filas.fetchall()
+
+    tablas_dict: dict[str, list[dict[str, str]]] = {}
+    for col in columnas:
+        tn = col.table_name
+        if tn not in tablas_dict:
+            tablas_dict[tn] = []
+        tablas_dict[tn].append(
+            {
+                "columna": col.column_name,
+                "tipo": col.data_type,
+                "nulo": "SI" if col.is_nullable == "YES" else "NO",
+                "defecto": str(col.column_default) if col.column_default else "—",
+            }
+        )
+
+    return templates.TemplateResponse(
+        request, "tablas.html", {"tablas": tablas_dict}
+    )
+
+
 @app.get("/health")
 async def health(db: AsyncSession = Depends(get_db)):
     try:

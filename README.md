@@ -43,6 +43,7 @@ El curso **CS50 SQL** de Harvard University ensena bases de datos usando SQLite 
 - **Contenido traducido** de las 2 primeras clases (`Clase 0: Consultas` y `Clase 1: Relaciones`), convertido de Markdown a paginas HTML con Jinja2.
 - **67 ejercicios interactivos** (35 de Consultas + 32 de Relaciones) con enunciado, indicador de dificultad y hoja de respuestas con las consultas solucion.
 - **Consola SQL interactiva** que ejecuta consultas reales contra PostgreSQL, con resultados renderizados en tabla.
+- **Explorador de esquema** (`/tablas`) que consulta `information_schema` en tiempo real y muestra columnas, tipos, nulabilidad y valores por defecto de cada tabla.
 - **Modo oscuro** completo desde el CSS unificado.
 - **Enfoque didactico** tanto para aprender SQL como para entender como se construye una app web con FastAPI y arquitectura multicapa.
 
@@ -82,6 +83,8 @@ El proyecto usa una base de datos PostgreSQL llamada `sql_teach` con **10 tablas
 | `lista_larga` | ~130 | Libros nominados al Booker Prize |
 | `leones_marinos` | ~10 | Datos de especie marina (ejemplo didactico para JOIN) |
 | `migraciones` | ~10 | Migraciones de leones marinos (ejemplo didactico) |
+
+La ruta **`/tablas`** muestra el esquema completo de cada tabla en tiempo real (columnas, tipos, nulabilidad y valores por defecto), consultando directamente `information_schema` de PostgreSQL.
 
 El archivo `datos.sql` contiene el dump completo (esquema + datos) listo para importar:
 
@@ -139,7 +142,8 @@ Este proyecto implementa una **arquitectura de 3 capas** (three-tier architectur
 │  routers/ejercicios.py       →  templates/ejercicios.html     │
 │                               →  templates/respuestas.html    │
 │  routers/consola.py          →  templates/consola.html        │
-│  main.py        (/, /health) →  templates/index.html, 500.html│
+│  main.py  (/, /tablas, /health)→ templates/index.html,         │
+│                                   tablas.html, 500.html         │
 │  templating.py  (instancia Jinja2Templates compartida)        │
 │                                                               │
 │  RESPONSABILIDAD: Recibir HTTP, delegar a servicios,          │
@@ -254,7 +258,7 @@ app.include_router(clases.router, prefix="/clases")
 app.include_router(ejercicios.router, prefix="/ejercicios")
 app.include_router(consola.router)
 ```
-Registra los routers con sus prefijos, monta los archivos estaticos, define el `lifespan` para la tarea de keep-alive, y expone dos rutas propias: `GET /` (pagina de inicio) y `GET /health` (healthcheck que ejecuta `SELECT 1` para verificar conectividad con la BD). Tambien define un manejador global `@app.exception_handler(500)` que renderiza `500.html`.
+Registra los routers con sus prefijos, monta los archivos estaticos, define el `lifespan` para la tarea de keep-alive, y expone tres rutas propias: `GET /` (pagina de inicio), `GET /tablas` (esquema de la BD consultando `information_schema` en tiempo real) y `GET /health` (healthcheck que ejecuta `SELECT 1` para verificar conectividad con la BD). Tambien define un manejador global `@app.exception_handler(500)` que renderiza `500.html`.
 
 ### Capa 2 — Servicios (Logica de negocio)
 
@@ -647,6 +651,7 @@ Cada pagina define los bloques que necesita:
 - `consola.html`: define `title`, `content`, `extra_css` (ancho extendido) y `extra_js` (atajo Ctrl+Enter).
 - `ejercicios.html`: define `title` y `content` iterando sobre `{% for e in ejercicios %}`.
 - `respuestas.html`: define `title` y `content` mostrando `{{ e.sql }}` en bloques `<pre>`.
+- `tablas.html`: define `title` y `content` iterando sobre `{% for nombre, columnas in tablas.items() %}`, mostrando cada tabla como una card con sus columnas, tipos y restricciones.
 
 Los templates reciben datos desde los routers via `TemplateResponse(request, "plantilla.html", {"clave": valor})`. Jinja2 renderiza el HTML combinando la plantilla base con los bloques definidos por cada pagina.
 
@@ -733,7 +738,7 @@ Las hojas de respuestas (`/ejercicios/clase0/respuestas`, `/ejercicios/clase1/re
 ```
 consultas_sql/
 │
-├── main.py                      # Punto de entrada: app FastAPI, lifespan, rutas / y /health
+├── main.py                      # Punto de entrada: app FastAPI, lifespan, rutas /, /tablas y /health
 ├── database.py                  # Capa 3: conexion async a PostgreSQL (SQLAlchemy + asyncpg)
 ├── templating.py                # Instancia unica compartida de Jinja2Templates
 ├── convertir_md.py              # Script offline: Markdown → plantillas Jinja2 (clase0/1.html)
@@ -763,6 +768,7 @@ consultas_sql/
 ├── templates/                   # Vistas Jinja2
 │   ├── base.html                # Layout comun: nav, CSS, Mermaid.js, bloques extensibles
 │   ├── index.html               # Pagina de inicio con descripcion y esquema de la BD
+│   ├── tablas.html              # Esquema detallado: columnas, tipos, nulabilidad (desde information_schema)
 │   ├── clase0.html              # Contenido Clase 0: Consultas (generado por convertir_md.py)
 │   ├── clase1.html              # Contenido Clase 1: Relaciones (generado por convertir_md.py)
 │   ├── ejercicios.html          # Listado de ejercicios con cards y badges de dificultad

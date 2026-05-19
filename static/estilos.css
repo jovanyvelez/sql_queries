@@ -367,6 +367,21 @@ h2 {
     padding: 1rem 0;
 }
 
+.btn-detalle {
+    font-size: 0.85rem;
+    color: #58a6ff;
+    text-decoration: none;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.btn-detalle:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: #58a6ff;
+}
+
 /* ── consola ──────────────────────────────────────────── */
 
 .consola {
