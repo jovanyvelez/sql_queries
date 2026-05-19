@@ -2,234 +2,303 @@
 {% block title %}Clase 1 — CS50 SQL{% endblock %}
 {% block content %}
 <div class="clase-content">
-<h1>Clase 1</h1>
-<h2>Tabla de Contenidos</h2>
-<ul>
-<li><a href="#introduccion">Introduccion</a></li>
-<li><a href="#diagramas-entidad-relacion">Diagramas Entidad-Relacion</a>
-<ul>
-<li><a href="#preguntas">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#claves">Claves</a>
-<ul>
-<li><a href="#claves-primarias">Claves Primarias</a></li>
-<li><a href="#claves-foraneas">Claves Foraneas</a></li>
-<li><a href="#preguntas-1">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#subconsultas">Subconsultas</a></li>
-<li><a href="#in"><code>IN</code></a>
-<ul>
-<li><a href="#preguntas-2">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#join"><code>JOIN</code></a>
-<ul>
-<li><a href="#preguntas-3">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#conjuntos">Conjuntos</a>
-<ul>
-<li><a href="#preguntas-4">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#grupos">Grupos</a>
-<ul>
-<li><a href="#preguntas-5">Preguntas</a></li>
-</ul>
-</li>
-<li><a href="#fin">Fin</a></li>
-</ul>
-<hr />
-<h2>Introduccion</h2>
-<ul>
-<li>Las bases de datos pueden tener multiples tablas. La clase pasada, vimos una base de datos de libros nominados para el International Booker Prize. Ahora veremos que esa base de datos tiene muchas tablas diferentes dentro de ella — para libros, autores, editoriales y demas.</li>
-<li>Primero, abre la base de datos usando psql en la terminal de tu sistema.</li>
-<li>Podemos usar el siguiente comando de psql para ver todas las tablas en nuestra base de datos:</li>
-</ul>
-<pre><code>\dt
+    <h1>Clase 1</h1>
+    <h2>Tabla de Contenidos</h2>
+    <ul>
+        <li><a href="#introduccion">Introduccion</a></li>
+        <li><a href="#diagramas-entidad-relacion">Diagramas Entidad-Relacion</a>
+            <ul>
+                <li><a href="#preguntas">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#claves">Claves</a>
+            <ul>
+                <li><a href="#claves-primarias">Claves Primarias</a></li>
+                <li><a href="#claves-foraneas">Claves Foraneas</a></li>
+                <li><a href="#preguntas-1">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#subconsultas">Subconsultas</a></li>
+        <li><a href="#in"><code>IN</code></a>
+            <ul>
+                <li><a href="#preguntas-2">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#join"><code>JOIN</code></a>
+            <ul>
+                <li><a href="#preguntas-3">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#conjuntos">Conjuntos</a>
+            <ul>
+                <li><a href="#preguntas-4">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#grupos">Grupos</a>
+            <ul>
+                <li><a href="#preguntas-5">Preguntas</a></li>
+            </ul>
+        </li>
+        <li><a href="#fin">Fin</a></li>
+    </ul>
+    <hr />
+    <h2>Introduccion</h2>
+    <ul>
+        <li>Las bases de datos pueden tener multiples tablas. La clase pasada, vimos una base de datos de libros
+            nominados para el International Booker Prize. Ahora veremos que esa base de datos tiene muchas tablas
+            diferentes dentro de ella — para libros, autores, editoriales y demas.</li>
+        <li>Primero, abre la base de datos usando psql en la terminal de tu sistema.</li>
+        <li>Podemos usar el siguiente comando de psql para ver todas las tablas en nuestra base de datos:</li>
+    </ul>
+    <pre><code>\dt
 </code></pre>
-<p>Este comando devuelve los nombres de las tablas en <code>sql_teach</code> — 10 en total.</p>
-<ul>
-<li>Estas tablas tienen algunas relaciones entre ellas, y por eso llamamos a la base de datos una <strong>base de datos relacional</strong>. Observa la lista de tablas en <code>sql_teach</code> e intenta imaginar relaciones entre ellas. Algunos ejemplos son:
-<ul>
-<li>Los autores escriben libros.</li>
-<li>Las editoriales publican libros.</li>
-<li>Los libros son traducidos por traductores.</li>
-</ul>
-</li>
-<li>Consideremos nuestro primer ejemplo. ¡Aqui hay una instantanea de las tablas <code>autores</code> y <code>libros</code> con las columnas de nombre de autor y titulo de libro!</li>
-</ul>
-<p><img src="/static/images/p6.jpg" alt="Columnas de Nombre de Autor y Titulo de Libro de diferentes tablas" /></p>
-<ul>
-<li>
-<p>Con solo mirar estas dos columnas, ¿como podemos saber quien escribio cual libro? Incluso si asumimos que cada libro esta alineado junto a su autor, solo mirar la tabla <code>autores</code> no nos daria informacion sobre los libros escritos por ese autor.</p>
-</li>
-<li>
-<p>Algunas posibles formas de organizar libros y autores son…</p>
-<ul>
-<li>
-<p><strong>el sistema de honor</strong>: la primera fila en la tabla <code>autores</code> siempre correspondera a la primera fila en la tabla <code>libros</code>. El problema con este sistema es que uno puede cometer un error (agregar un libro pero olvidar agregar su autor correspondiente, o viceversa). Ademas, un autor puede haber escrito mas de un libro o un libro puede ser coescrito por multiples autores.</p>
-</li>
-<li>
-<p><strong>volver a un enfoque de una sola tabla</strong>: Este enfoque podria resultar en redundancia (duplicacion de datos) si un autor escribe multiples libros o si un libro es coescrito por multiples autores. Abajo hay una instantanea del enfoque de una tabla con algunos datos redundantes.</p>
-<p><img src="/static/images/p8.jpg" alt="Enfoque de una tabla: autor con multiples libros" /></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Despues de considerar estas ideas, parece que tener dos tablas diferentes es el enfoque mas eficiente. Veamos algunas formas diferentes en que las tablas pueden relacionarse entre si en bases de datos relacionales.</p>
-</li>
-<li>
-<p>Considera este caso, donde cada autor escribe solo un libro y cada libro es escrito por un autor. Esto se llama una relacion uno a uno.</p>
-<p><img src="/static/images/p10.jpg" alt="Relacion uno a uno" /></p>
-</li>
-<li>
-<p>Por otro lado, si un autor puede escribir multiples libros, la relacion es una relacion uno a muchos.</p>
-<p><img src="/static/images/p11.jpg" alt="Relacion uno a muchos" /></p>
-</li>
-<li>
-<p>Aqui vemos otra situacion donde no solo un autor puede escribir multiples libros, sino que los libros tambien pueden ser coescritos por multiples autores. Esta es una relacion muchos a muchos.</p>
-<p><img src="/static/images/p12.jpg" alt="Relacion muchos a muchos" /></p>
-</li>
-</ul>
-<hr />
-<h2>Diagramas Entidad-Relacion</h2>
-<ul>
-<li>Acabamos de describir relaciones uno a uno, uno a muchos y muchos a muchos entre tablas en una base de datos. Es posible visualizar dichas relaciones usando un diagrama entidad-relacion (ER).</li>
-<li>Aqui hay un diagrama ER para las tablas en nuestra base de datos.</li>
-</ul>
-<div class="mermaid">
-erDiagram
-  &quot;Autor&quot; }|--|{ &quot;Libro&quot; : &quot;escribe&quot;
-  &quot;Editorial&quot; ||--|{ &quot;Libro&quot; : &quot;publica&quot;
-  &quot;Traductor&quot; }o--|{ &quot;Libro&quot; : &quot;traduce&quot;
-  &quot;Libro&quot; ||--o{ &quot;Puntuacion&quot; : &quot;tiene&quot;
-</div>
-<ul>
-<li>
-<p>Cada tabla es una entidad en nuestra base de datos. Las relaciones entre las tablas, o entidades, estan representadas por los <em>verbos</em> que marcan las lineas que conectan entidades.</p>
-</li>
-<li>
-<p>Cada linea en este diagrama esta en notacion de pata de cuervo.</p>
-<ul>
-<li>
-<p>La primera linea con un circulo parece un 0 marcado en la linea. Esta linea indica que no hay relaciones.</p>
-</li>
-<li>
-<p>La segunda linea con una linea perpendicular parece un 1 marcado en la linea. Una entidad con esta flecha debe tener al menos una fila relacionada con ella en la otra tabla.</p>
-</li>
-<li>
-<p>La tercera linea, que parece una pata de cuervo, tiene muchas ramas. Esta linea significa que la entidad esta relacionada con muchas filas de otra tabla.</p>
-<p><img src="/static/images/p17.jpg" alt="Lineas en Diagramas ER" /></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Por ejemplo:</p>
-<ul>
-<li>
-<p>Leemos la notacion de izquierda a derecha. Un autor escribe un libro (o, cada autor puede tener un libro asociado con el).</p>
-<p><img src="/static/images/p18.jpg" alt="Notacion 1-Relacion: un autor escribe un libro" /></p>
-</li>
-<li>
-<p>Ahora, no solo un autor escribe un libro sino que un libro tambien es escrito por un autor.</p>
-<p><img src="/static/images/p19.jpg" alt="Notacion 1-Relacion: un autor escribe un libro y un libro es escrito por un autor" /></p>
-</li>
-<li>
-<p>Con esta adicion, un autor escribe al menos un libro y un libro es escrito por al menos un autor. Para reformular, un autor podria estar asociado con uno o multiples libros y un libro puede ser escrito por uno o multiples autores.</p>
-<p><img src="/static/images/p20.jpg" alt="Agregando multiples lineas: un autor escribe al menos un libro y un libro es escrito por al menos un autor" /></p>
-</li>
-</ul>
-</li>
-<li>
-<p>Revisemos el diagrama ER para nuestra base de datos.</p>
-</li>
-</ul>
-<div class="mermaid">
-erDiagram
-  &quot;Autor&quot; }|--|{ &quot;Libro&quot; : &quot;escribe&quot;
-  &quot;Editorial&quot; ||--|{ &quot;Libro&quot; : &quot;publica&quot;
-  &quot;Traductor&quot; }o--|{ &quot;Libro&quot; : &quot;traduce&quot;
-  &quot;Libro&quot; ||--o{ &quot;Puntuacion&quot; : &quot;tiene&quot;
-</div>
-<ul>
-<li>Al observar las lineas que conectan las entidades Libro y Traductor, podemos decir que los libros no <em>necesitan</em> tener un traductor. Podrian tener de cero a muchos traductores. Sin embargo, un traductor en la base de datos traduce al menos un libro, y posiblemente muchos.</li>
-</ul>
-<h3>Preguntas</h3>
-<blockquote>
-<p>Si tenemos alguna base de datos, ¿como sabemos las relaciones entre las entidades almacenadas dentro de ella?</p>
-</blockquote>
-<ul>
-<li>Las relaciones exactas entre entidades dependen realmente del disenador de la base de datos. Por ejemplo, si cada autor puede escribir solo un libro o multiples libros es una decision que se toma al disenar la base de datos. Un diagrama ER puede pensarse como una herramienta para comunicar estas decisiones a alguien que quiera entender la base de datos y las relaciones entre sus entidades.</li>
-</ul>
-<blockquote>
-<p>Una vez que sabemos que existe una relacion entre ciertas entidades, ¿como implementamos eso en nuestra base de datos?</p>
-</blockquote>
-<ul>
-<li>Pronto veremos como podemos usar <strong>claves</strong> en SQL para relacionar tablas entre si.</li>
-</ul>
-<hr />
-<h2>Claves</h2>
-<h3>Claves Primarias</h3>
-<ul>
-<li>
-<p>En el caso de los libros, cada libro tiene un identificador unico llamado ISBN. En otras palabras, si buscas un libro por su ISBN, solo se encontrara un libro. En terminos de base de datos, el ISBN es una clave primaria — un identificador que es unico para cada elemento en una tabla.</p>
-<p><img src="/static/images/p29.jpg" alt="Tabla con ISBNs y titulos de libros" /></p>
-</li>
-<li>
-<p>Inspirados por esta idea de un ISBN, ¡podemos imaginar asignar IDs unicos a nuestras editoriales, autores y traductores! Cada uno de estos IDs seria la clave primaria de la tabla a la que pertenece.</p>
-</li>
-</ul>
-<h3>Claves Foraneas</h3>
-<ul>
-<li>
-<p>Las claves tambien ayudan a relacionar tablas en SQL.</p>
-</li>
-<li>
-<p>Una clave foranea es una clave primaria tomada de una tabla diferente. Al referenciar la clave primaria de una tabla diferente, ayuda a relacionar las tablas formando un vinculo entre ellas.</p>
-<p><img src="/static/images/p31.jpg" alt="Relacionando las tablas libros y puntuaciones usando clave foranea" /></p>
-<p>Observa como la clave primaria de la tabla <code>libros</code> ahora es una columna en la tabla <code>puntuaciones</code>. Esto ayuda a formar una relacion uno a muchos entre las dos tablas — un libro con un titulo (encontrado en la tabla <code>libros</code>) puede tener multiples puntuaciones (encontradas en la tabla <code>puntuaciones</code>).</p>
-</li>
-<li>
-<p>El ISBN, como podemos ver, es un identificador largo. Si cada caracter ocupara un byte de memoria, almacenar un solo ISBN (incluyendo los guiones) tomaria 17 bytes de memoria, ¡lo cual es mucho!</p>
-</li>
-<li>
-<p>Afortunadamente, no necesariamente tenemos que usar el ISBN como clave primaria. Podemos construir la nuestra usando numeros como 1, 2, 3… y asi sucesivamente siempre que cada libro tenga un numero unico para identificarlo.</p>
-</li>
-<li>
-<p>Anteriormente, vimos como implementar la relacion uno a muchos entre las entidades <code>libros</code> y <code>puntuaciones</code>. Aqui hay un ejemplo de una relacion muchos a muchos.</p>
-<p><img src="/static/images/p40.jpg" alt="Relacionando las tablas autores y libros usando una clave foranea y otra tabla" /></p>
-</li>
-</ul>
-<p>Ahora hay una tabla llamada <code>autoria</code> que mapea la clave primaria de <code>libros</code> (<code>libro_id</code>) a la clave primaria de <code>autores</code> (<code>autor_id</code>).</p>
-<h3>Preguntas</h3>
-<blockquote>
-<p>¿Pueden los IDs del autor y del libro ser iguales? Por ejemplo, si <code>autor_id</code> es 1 y <code>libro_id</code> tambien es 1 en la tabla <code>autoria</code>, ¿habra una confusion?</p>
-</blockquote>
-<ul>
-<li>Tablas como <code>autoria</code> se llaman tablas de &quot;union&quot; o &quot;juncion&quot;. En dichas tablas, generalmente sabemos cual clave primaria es referenciada por cual columna. En este caso, dado que sabemos que la primera columna contiene solo la clave primaria de <code>autores</code> y la segunda columna contiene de manera similar solo la clave primaria de <code>libros</code>, ¡estaria bien incluso si los valores coincidieran!</li>
-</ul>
-<blockquote>
-<p>Si tenemos muchas tablas de union como esta, ¿no ocuparia demasiado espacio?</p>
-</blockquote>
-<ul>
-<li>Si, hay un intercambio aqui. Tablas como estas ocupan mas espacio pero tambien nos permiten tener relaciones muchos a muchos sin redundancias, como vimos antes.</li>
-</ul>
-<blockquote>
-<p>Al cambiar el ID de un libro o autor, ¿el ID se actualiza en las otras tablas tambien?</p>
-</blockquote>
-<ul>
-<li>Un ID actualizado aun necesita ser unico. Dado eso, los IDs a menudo se abstraen y raramente los cambiamos.</li>
-</ul>
-<hr />
-<h2>Subconsultas</h2>
-<ul>
-<li>Una subconsulta es una consulta dentro de otra consulta. Tambien se llaman consultas anidadas.</li>
-<li>Considera este ejemplo para una relacion uno a muchos. En la tabla <code>libros</code>, tenemos un ID para indicar la editorial, que es una clave foranea tomada de la tabla <code>editoriales</code>. Para averiguar los libros publicados por Fitzcarraldo Editions, necesitariamos dos consultas — una para encontrar el <code>id</code> de Fitzcarraldo Editions en la tabla <code>editoriales</code> y la segunda, para usar este <code>id</code> para encontrar todos los libros publicados por Fitzcarraldo Editions. Estas dos consultas se pueden combinar en una usando la idea de una subconsulta.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;titulo&quot;
+    <p>Este comando devuelve los nombres de las tablas en <code>sql_teach</code> — 10 en total.</p>
+    <ul>
+        <li>Estas tablas tienen algunas relaciones entre ellas, y por eso llamamos a la base de datos una <strong>base
+                de datos relacional</strong>. Observa la lista de tablas en <code>sql_teach</code> e intenta imaginar
+            relaciones entre ellas. Algunos ejemplos son:
+            <ul>
+                <li>Los autores escriben libros.</li>
+                <li>Las editoriales publican libros.</li>
+                <li>Los libros son traducidos por traductores.</li>
+            </ul>
+        </li>
+        <li>Consideremos nuestro primer ejemplo. ¡Aqui hay una instantanea de las tablas <code>autores</code> y
+            <code>libros</code> con las columnas de nombre de autor y titulo de libro!
+        </li>
+    </ul>
+    <p><img src="/static/images/p6.jpg" alt="Columnas de Nombre de Autor y Titulo de Libro de diferentes tablas" /></p>
+    <ul>
+        <li>
+            <p>Con solo mirar estas dos columnas, ¿como podemos saber quien escribio cual libro? Incluso si asumimos que
+                cada libro esta alineado junto a su autor, solo mirar la tabla <code>autores</code> no nos daria
+                informacion sobre los libros escritos por ese autor.</p>
+        </li>
+        <li>
+            <p>Algunas posibles formas de organizar libros y autores son…</p>
+            <ul>
+                <li>
+                    <p><strong>el sistema de honor</strong>: la primera fila en la tabla <code>autores</code> siempre
+                        correspondera a la primera fila en la tabla <code>libros</code>. El problema con este sistema es
+                        que uno puede cometer un error (agregar un libro pero olvidar agregar su autor correspondiente,
+                        o viceversa). Ademas, un autor puede haber escrito mas de un libro o un libro puede ser
+                        coescrito por multiples autores.</p>
+                </li>
+                <li>
+                    <p><strong>volver a un enfoque de una sola tabla</strong>: Este enfoque podria resultar en
+                        redundancia (duplicacion de datos) si un autor escribe multiples libros o si un libro es
+                        coescrito por multiples autores. Abajo hay una instantanea del enfoque de una tabla con algunos
+                        datos redundantes.</p>
+                    <p><img src="/static/images/p8.jpg" alt="Enfoque de una tabla: autor con multiples libros" /></p>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <p>Despues de considerar estas ideas, parece que tener dos tablas diferentes es el enfoque mas eficiente.
+                Veamos algunas formas diferentes en que las tablas pueden relacionarse entre si en bases de datos
+                relacionales.</p>
+        </li>
+        <li>
+            <p>Considera este caso, donde cada autor escribe solo un libro y cada libro es escrito por un autor. Esto se
+                llama una relacion uno a uno.</p>
+            <p><img src="/static/images/p10.jpg" alt="Relacion uno a uno" /></p>
+        </li>
+        <li>
+            <p>Por otro lado, si un autor puede escribir multiples libros, la relacion es una relacion uno a muchos.</p>
+            <p><img src="/static/images/p11.jpg" alt="Relacion uno a muchos" /></p>
+        </li>
+        <li>
+            <p>Aqui vemos otra situacion donde no solo un autor puede escribir multiples libros, sino que los libros
+                tambien pueden ser coescritos por multiples autores. Esta es una relacion muchos a muchos.</p>
+            <p><img src="/static/images/p12.jpg" alt="Relacion muchos a muchos" /></p>
+        </li>
+    </ul>
+    <hr />
+    <h2>Diagramas Entidad-Relacion</h2>
+    <ul>
+        <li>Acabamos de describir relaciones uno a uno, uno a muchos y muchos a muchos entre tablas en una base de
+            datos. Es posible visualizar dichas relaciones usando un diagrama entidad-relacion (ER).</li>
+        <li>Aqui hay un diagrama ER para las tablas en nuestra base de datos.</li>
+    </ul>
+    <div class="mermaid">
+        erDiagram
+        &quot;Autor&quot; }|--|{ &quot;Libro&quot; : &quot;escribe&quot;
+        &quot;Editorial&quot; ||--|{ &quot;Libro&quot; : &quot;publica&quot;
+        &quot;Traductor&quot; }o--|{ &quot;Libro&quot; : &quot;traduce&quot;
+        &quot;Libro&quot; ||--o{ &quot;Puntuacion&quot; : &quot;tiene&quot;
+    </div>
+    <ul>
+        <li>
+            <p>Cada tabla es una entidad en nuestra base de datos. Las relaciones entre las tablas, o entidades, estan
+                representadas por los <em>verbos</em> que marcan las lineas que conectan entidades.</p>
+        </li>
+        <li>
+            <p>Cada linea en este diagrama esta en notacion de pata de cuervo.</p>
+            <ul>
+                <li>
+                    <p>La primera linea con un circulo parece un 0 marcado en la linea. Esta linea indica que no hay
+                        relaciones.</p>
+                </li>
+                <li>
+                    <p>La segunda linea con una linea perpendicular parece un 1 marcado en la linea. Una entidad con
+                        esta flecha debe tener al menos una fila relacionada con ella en la otra tabla.</p>
+                </li>
+                <li>
+                    <p>La tercera linea, que parece una pata de cuervo, tiene muchas ramas. Esta linea significa que la
+                        entidad esta relacionada con muchas filas de otra tabla.</p>
+                    <p><img src="/static/images/p17.jpg" alt="Lineas en Diagramas ER" /></p>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <p>Por ejemplo:</p>
+            <ul>
+                <li>
+                    <p>Leemos la notacion de izquierda a derecha. Un autor escribe un libro (o, cada autor puede tener
+                        un libro asociado con el).</p>
+                    <p><img src="/static/images/p18.jpg" alt="Notacion 1-Relacion: un autor escribe un libro" /></p>
+                </li>
+                <li>
+                    <p>Ahora, no solo un autor escribe un libro sino que un libro tambien es escrito por un autor.</p>
+                    <p><img src="/static/images/p19.jpg"
+                            alt="Notacion 1-Relacion: un autor escribe un libro y un libro es escrito por un autor" />
+                    </p>
+                </li>
+                <li>
+                    <p>Con esta adicion, un autor escribe al menos un libro y un libro es escrito por al menos un autor.
+                        Para reformular, un autor podria estar asociado con uno o multiples libros y un libro puede ser
+                        escrito por uno o multiples autores.</p>
+                    <p><img src="/static/images/p20.jpg"
+                            alt="Agregando multiples lineas: un autor escribe al menos un libro y un libro es escrito por al menos un autor" />
+                    </p>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <p>Revisemos el diagrama ER para nuestra base de datos.</p>
+        </li>
+    </ul>
+    <div class="mermaid">
+        erDiagram
+        &quot;Autor&quot; }|--|{ &quot;Libro&quot; : &quot;escribe&quot;
+        &quot;Editorial&quot; ||--|{ &quot;Libro&quot; : &quot;publica&quot;
+        &quot;Traductor&quot; }o--|{ &quot;Libro&quot; : &quot;traduce&quot;
+        &quot;Libro&quot; ||--o{ &quot;Puntuacion&quot; : &quot;tiene&quot;
+    </div>
+    <ul>
+        <li>Al observar las lineas que conectan las entidades Libro y Traductor, podemos decir que los libros no
+            <em>necesitan</em> tener un traductor. Podrian tener de cero a muchos traductores. Sin embargo, un traductor
+            en la base de datos traduce al menos un libro, y posiblemente muchos.
+        </li>
+    </ul>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>Si tenemos alguna base de datos, ¿como sabemos las relaciones entre las entidades almacenadas dentro de ella?
+        </p>
+    </blockquote>
+    <ul>
+        <li>Las relaciones exactas entre entidades dependen realmente del disenador de la base de datos. Por ejemplo, si
+            cada autor puede escribir solo un libro o multiples libros es una decision que se toma al disenar la base de
+            datos. Un diagrama ER puede pensarse como una herramienta para comunicar estas decisiones a alguien que
+            quiera entender la base de datos y las relaciones entre sus entidades.</li>
+    </ul>
+    <blockquote>
+        <p>Una vez que sabemos que existe una relacion entre ciertas entidades, ¿como implementamos eso en nuestra base
+            de datos?</p>
+    </blockquote>
+    <ul>
+        <li>Pronto veremos como podemos usar <strong>claves</strong> en SQL para relacionar tablas entre si.</li>
+    </ul>
+    <hr />
+    <h2>Claves</h2>
+    <h3>Claves Primarias</h3>
+    <ul>
+        <li>
+            <p>En el caso de los libros, cada libro tiene un identificador unico llamado ISBN. En otras palabras, si
+                buscas un libro por su ISBN, solo se encontrara un libro. En terminos de base de datos, el ISBN es una
+                clave primaria — un identificador que es unico para cada elemento en una tabla.</p>
+            <p><img src="/static/images/p29.jpg" alt="Tabla con ISBNs y titulos de libros" /></p>
+        </li>
+        <li>
+            <p>Inspirados por esta idea de un ISBN, ¡podemos imaginar asignar IDs unicos a nuestras editoriales, autores
+                y traductores! Cada uno de estos IDs seria la clave primaria de la tabla a la que pertenece.</p>
+        </li>
+    </ul>
+    <h3>Claves Foraneas</h3>
+    <ul>
+        <li>
+            <p>Las claves tambien ayudan a relacionar tablas en SQL.</p>
+        </li>
+        <li>
+            <p>Una clave foranea es una clave primaria tomada de una tabla diferente. Al referenciar la clave primaria
+                de una tabla diferente, ayuda a relacionar las tablas formando un vinculo entre ellas.</p>
+            <p><img src="/static/images/p31.jpg"
+                    alt="Relacionando las tablas libros y puntuaciones usando clave foranea" /></p>
+            <p>Observa como la clave primaria de la tabla <code>libros</code> ahora es una columna en la tabla
+                <code>puntuaciones</code>. Esto ayuda a formar una relacion uno a muchos entre las dos tablas — un libro
+                con un titulo (encontrado en la tabla <code>libros</code>) puede tener multiples puntuaciones
+                (encontradas en la tabla <code>puntuaciones</code>).
+            </p>
+        </li>
+        <li>
+            <p>El ISBN, como podemos ver, es un identificador largo. Si cada caracter ocupara un byte de memoria,
+                almacenar un solo ISBN (incluyendo los guiones) tomaria 17 bytes de memoria, ¡lo cual es mucho!</p>
+        </li>
+        <li>
+            <p>Afortunadamente, no necesariamente tenemos que usar el ISBN como clave primaria. Podemos construir la
+                nuestra usando numeros como 1, 2, 3… y asi sucesivamente siempre que cada libro tenga un numero unico
+                para identificarlo.</p>
+        </li>
+        <li>
+            <p>Anteriormente, vimos como implementar la relacion uno a muchos entre las entidades <code>libros</code> y
+                <code>puntuaciones</code>. Aqui hay un ejemplo de una relacion muchos a muchos.
+            </p>
+            <p><img src="/static/images/p40.jpg"
+                    alt="Relacionando las tablas autores y libros usando una clave foranea y otra tabla" /></p>
+        </li>
+    </ul>
+    <p>Ahora hay una tabla llamada <code>autoria</code> que mapea la clave primaria de <code>libros</code>
+        (<code>libro_id</code>) a la clave primaria de <code>autores</code> (<code>autor_id</code>).</p>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>¿Pueden los IDs del autor y del libro ser iguales? Por ejemplo, si <code>autor_id</code> es 1 y
+            <code>libro_id</code> tambien es 1 en la tabla <code>autoria</code>, ¿habra una confusion?
+        </p>
+    </blockquote>
+    <ul>
+        <li>Tablas como <code>autoria</code> se llaman tablas de &quot;union&quot; o &quot;juncion&quot;. En dichas
+            tablas, generalmente sabemos cual clave primaria es referenciada por cual columna. En este caso, dado que
+            sabemos que la primera columna contiene solo la clave primaria de <code>autores</code> y la segunda columna
+            contiene de manera similar solo la clave primaria de <code>libros</code>, ¡estaria bien incluso si los
+            valores coincidieran!</li>
+    </ul>
+    <blockquote>
+        <p>Si tenemos muchas tablas de union como esta, ¿no ocuparia demasiado espacio?</p>
+    </blockquote>
+    <ul>
+        <li>Si, hay un intercambio aqui. Tablas como estas ocupan mas espacio pero tambien nos permiten tener relaciones
+            muchos a muchos sin redundancias, como vimos antes.</li>
+    </ul>
+    <blockquote>
+        <p>Al cambiar el ID de un libro o autor, ¿el ID se actualiza en las otras tablas tambien?</p>
+    </blockquote>
+    <ul>
+        <li>Un ID actualizado aun necesita ser unico. Dado eso, los IDs a menudo se abstraen y raramente los cambiamos.
+        </li>
+    </ul>
+    <hr />
+    <h2>Subconsultas</h2>
+    <ul>
+        <li>Una subconsulta es una consulta dentro de otra consulta. Tambien se llaman consultas anidadas.</li>
+        <li>Considera este ejemplo para una relacion uno a muchos. En la tabla <code>libros</code>, tenemos un ID para
+            indicar la editorial, que es una clave foranea tomada de la tabla <code>editoriales</code>. Para averiguar
+            los libros publicados por Fitzcarraldo Editions, necesitariamos dos consultas — una para encontrar el
+            <code>id</code> de Fitzcarraldo Editions en la tabla <code>editoriales</code> y la segunda, para usar este
+            <code>id</code> para encontrar todos los libros publicados por Fitzcarraldo Editions. Estas dos consultas se
+            pueden combinar en una usando la idea de una subconsulta.
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;titulo&quot;
 FROM &quot;libros&quot;
 WHERE &quot;editorial_id&quot; = (
     SELECT &quot;id&quot;
@@ -237,19 +306,21 @@ WHERE &quot;editorial_id&quot; = (
     WHERE &quot;editorial&quot; = 'Fitzcarraldo Editions'
 );
 </code></pre>
-<p>Observa que:</p>
-<ul>
-<li>
-<p>La subconsulta esta entre parentesis. La consulta que esta mas adentro de los parentesis se ejecutara primero, seguida por las consultas externas.</p>
-</li>
-<li>
-<p>La consulta interna esta indentada. Esto se hace segun las convenciones de estilo para subconsultas, para aumentar la legibilidad.</p>
-</li>
-<li>
-<p>Para encontrar todas las puntuaciones del libro In Memory of Memory</p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;puntuacion&quot;
+    <p>Observa que:</p>
+    <ul>
+        <li>
+            <p>La subconsulta esta entre parentesis. La consulta que esta mas adentro de los parentesis se ejecutara
+                primero, seguida por las consultas externas.</p>
+        </li>
+        <li>
+            <p>La consulta interna esta indentada. Esto se hace segun las convenciones de estilo para subconsultas, para
+                aumentar la legibilidad.</p>
+        </li>
+        <li>
+            <p>Para encontrar todas las puntuaciones del libro In Memory of Memory</p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;puntuacion&quot;
 FROM &quot;puntuaciones&quot;
 WHERE &quot;libro_id&quot; = (
     SELECT &quot;id&quot;
@@ -257,10 +328,10 @@ WHERE &quot;libro_id&quot; = (
     WHERE &quot;titulo&quot; = 'In Memory of Memory'
 );
 </code></pre>
-<ul>
-<li>Para seleccionar solo la puntuacion promedio de este libro</li>
-</ul>
-<pre><code class="language-sql">SELECT AVG(&quot;puntuacion&quot;)
+    <ul>
+        <li>Para seleccionar solo la puntuacion promedio de este libro</li>
+    </ul>
+    <pre><code class="language-sql">SELECT AVG(&quot;puntuacion&quot;)
 FROM &quot;puntuaciones&quot;
 WHERE &quot;libro_id&quot; = (
     SELECT &quot;id&quot;
@@ -268,10 +339,13 @@ WHERE &quot;libro_id&quot; = (
     WHERE &quot;titulo&quot; = 'In Memory of Memory'
 );
 </code></pre>
-<ul>
-<li>El siguiente ejemplo es para relaciones muchos a muchos. Para encontrar el/los autor(es) que escribieron el libro Flights, se necesitaria consultar tres tablas: <code>libros</code>, <code>autores</code> y <code>autoria</code>.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;nombre&quot;
+    <ul>
+        <li>El siguiente ejemplo es para relaciones muchos a muchos. Para encontrar el/los autor(es) que escribieron el
+            libro Flights, se necesitaria consultar tres tablas: <code>libros</code>, <code>autores</code> y
+            <code>autoria</code>.
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;nombre&quot;
 FROM &quot;autores&quot;
 WHERE &quot;id&quot; = (
     SELECT &quot;autor_id&quot;
@@ -283,14 +357,19 @@ WHERE &quot;id&quot; = (
     )
 );
 </code></pre>
-<p>La primera consulta que se ejecuta es la mas profundamente anidada — encontrar el ID del libro Flights. Luego, se encuentra el ID del/los autor(es) que escribieron Flights. Por ultimo, esto se usa para recuperar el/los nombre(s) del autor.</p>
-<hr />
-<h2><code>IN</code></h2>
-<ul>
-<li>Esta palabra clave se usa para verificar si el valor deseado esta <em>en</em> una lista o conjunto de valores dado.</li>
-<li>La relacion entre autores y libros es muchos a muchos. Esto significa que es posible que un autor dado haya escrito mas de un libro. Para encontrar los nombres de todos los libros en la base de datos escritos por Fernanda Melchor, usariamos la palabra clave <code>IN</code> de la siguiente manera.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;titulo&quot;
+    <p>La primera consulta que se ejecuta es la mas profundamente anidada — encontrar el ID del libro Flights. Luego, se
+        encuentra el ID del/los autor(es) que escribieron Flights. Por ultimo, esto se usa para recuperar el/los
+        nombre(s) del autor.</p>
+    <hr />
+    <h2><code>IN</code></h2>
+    <ul>
+        <li>Esta palabra clave se usa para verificar si el valor deseado esta <em>en</em> una lista o conjunto de
+            valores dado.</li>
+        <li>La relacion entre autores y libros es muchos a muchos. Esto significa que es posible que un autor dado haya
+            escrito mas de un libro. Para encontrar los nombres de todos los libros en la base de datos escritos por
+            Fernanda Melchor, usariamos la palabra clave <code>IN</code> de la siguiente manera.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;titulo&quot;
 FROM &quot;libros&quot;
 WHERE &quot;id&quot; IN (
     SELECT &quot;libro_id&quot;
@@ -302,167 +381,217 @@ WHERE &quot;id&quot; IN (
     )
 );
 </code></pre>
-<p>Nota que la consulta mas interna usa <code>=</code> y no el operador <code>IN</code>. Esto se debe a que esperamos encontrar solo un autor llamado Fernanda Melchor.</p>
-<h3>Preguntas</h3>
-<blockquote>
-<p>¿Que pasa si el valor de una consulta interna no se encuentra?</p>
-</blockquote>
-<ul>
-<li>En este caso, la consulta interna no devolveria nada, lo que provocaria que la consulta externa tampoco devuelva nada. La consulta externa depende por tanto de los resultados de la consulta interna.</li>
-</ul>
-<blockquote>
-<p>¿Es necesario usar cuatro espacios para indentar una subconsulta?</p>
-</blockquote>
-<ul>
-<li>No. El numero de espacios usados para indentar una subconsulta puede variar, al igual que la longitud de cada linea en la consulta. Pero la idea central detras de dividir consultas e indentar subconsultas es hacerlas legibles.</li>
-</ul>
-<blockquote>
-<p>¿Como podemos implementar una relacion muchos a uno entre tablas?</p>
-</blockquote>
-<ul>
-<li>Considera la situacion en la que un libro es coescrito por multiples autores. Tendriamos una tabla <code>autoria</code> con multiples entradas para el mismo <code>libro_id</code>. Cada una de estas entradas tendria un <code>autor_id</code> diferente. Vale la pena notar que los valores de clave foranea pueden repetirse dentro de una tabla, pero los valores de clave primaria son siempre unicos.</li>
-</ul>
-<hr />
-<h2><code>JOIN</code></h2>
-<ul>
-<li>
-<p>Esta palabra clave nos permite combinar dos o mas tablas juntas.</p>
-</li>
-<li>
-<p>Para entender como funciona <code>JOIN</code>, considera una base de datos de leones marinos y sus patrones de migracion. Aqui hay una instantanea de la base de datos.</p>
-<p><img src="/static/images/p69.jpg" alt="Base de datos de Leones Marinos con tablas: leones_marinos, migraciones" /></p>
-</li>
-<li>
-<p>Para averiguar que tan lejos viajo el leon marino Spot, o responder preguntas similares sobre cada leon marino, podriamos usar consultas anidadas. Alternativamente, podriamos unir las tablas <code>leones_marinos</code> y <code>migraciones</code> de tal manera que cada leon marino tambien tenga su informacion correspondiente como una extension de la misma fila.</p>
-</li>
-<li>
-<p>Podemos unir las tablas por el ID del leon marino (el factor comun entre las dos tablas) para asegurar que las filas correctas esten alineadas unas contra otras.</p>
-</li>
-<li>
-<p>Para unir las tablas:</p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT *
+    <p>Nota que la consulta mas interna usa <code>=</code> y no el operador <code>IN</code>. Esto se debe a que
+        esperamos encontrar solo un autor llamado Fernanda Melchor.</p>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>¿Que pasa si el valor de una consulta interna no se encuentra?</p>
+    </blockquote>
+    <ul>
+        <li>En este caso, la consulta interna no devolveria nada, lo que provocaria que la consulta externa tampoco
+            devuelva nada. La consulta externa depende por tanto de los resultados de la consulta interna.</li>
+    </ul>
+    <blockquote>
+        <p>¿Es necesario usar cuatro espacios para indentar una subconsulta?</p>
+    </blockquote>
+    <ul>
+        <li>No. El numero de espacios usados para indentar una subconsulta puede variar, al igual que la longitud de
+            cada linea en la consulta. Pero la idea central detras de dividir consultas e indentar subconsultas es
+            hacerlas legibles.</li>
+    </ul>
+    <blockquote>
+        <p>¿Como podemos implementar una relacion muchos a uno entre tablas?</p>
+    </blockquote>
+    <ul>
+        <li>Considera la situacion en la que un libro es coescrito por multiples autores. Tendriamos una tabla
+            <code>autoria</code> con multiples entradas para el mismo <code>libro_id</code>. Cada una de estas entradas
+            tendria un <code>autor_id</code> diferente. Vale la pena notar que los valores de clave foranea pueden
+            repetirse dentro de una tabla, pero los valores de clave primaria son siempre unicos.
+        </li>
+    </ul>
+    <hr />
+    <h2><code>JOIN</code></h2>
+    <ul>
+        <li>
+            <p>Esta palabra clave nos permite combinar dos o mas tablas juntas.</p>
+        </li>
+        <li>
+            <p>Para entender como funciona <code>JOIN</code>, considera una base de datos de leones marinos y sus
+                patrones de migracion. Aqui hay una instantanea de la base de datos.</p>
+            <p><img src="/static/images/p69.jpg"
+                    alt="Base de datos de Leones Marinos con tablas: leones_marinos, migraciones" /></p>
+        </li>
+        <li>
+            <p>Para averiguar que tan lejos viajo el leon marino Spot, o responder preguntas similares sobre cada leon
+                marino, podriamos usar consultas anidadas. Alternativamente, podriamos unir las tablas
+                <code>leones_marinos</code> y <code>migraciones</code> de tal manera que cada leon marino tambien tenga
+                su informacion correspondiente como una extension de la misma fila.
+            </p>
+        </li>
+        <li>
+            <p>Podemos unir las tablas por el ID del leon marino (el factor comun entre las dos tablas) para asegurar
+                que las filas correctas esten alineadas unas contra otras.</p>
+        </li>
+        <li>
+            <p>Para unir las tablas:</p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT *
 FROM &quot;leones_marinos&quot;
 JOIN &quot;migraciones&quot; ON &quot;migraciones&quot;.&quot;id&quot; = &quot;leones_marinos&quot;.&quot;id&quot;;
 </code></pre>
-<p>Observa que:</p>
-<ul>
-<li>
-<p>La palabra clave <code>ON</code> se usa para especificar que valores coinciden entre las tablas que se estan uniendo. No es posible unir tablas sin valores coincidentes.</p>
-</li>
-<li>
-<p>Si hay algun ID en una tabla que no esta presente en la otra, esta fila no estara presente en la tabla unida. Este tipo de union se llama <code>INNER JOIN</code>.</p>
-</li>
-<li>
-<p>Algunas otras formas de unir tablas que nos permiten retener ciertos IDs no coincidentes son <code>LEFT JOIN</code>, <code>RIGHT JOIN</code> y <code>FULL JOIN</code>. Cada uno de estos es un tipo de <code>OUTER JOIN</code>.</p>
-</li>
-<li>
-<p>Un <code>LEFT JOIN</code> prioriza los datos en la tabla izquierda (o primera).</p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT *
+    <p>Observa que:</p>
+    <ul>
+        <li>
+            <p>La palabra clave <code>ON</code> se usa para especificar que valores coinciden entre las tablas que se
+                estan uniendo. No es posible unir tablas sin valores coincidentes.</p>
+        </li>
+        <li>
+            <p>Si hay algun ID en una tabla que no esta presente en la otra, esta fila no estara presente en la tabla
+                unida. Este tipo de union se llama <code>INNER JOIN</code>.</p>
+        </li>
+        <li>
+            <p>Algunas otras formas de unir tablas que nos permiten retener ciertos IDs no coincidentes son
+                <code>LEFT JOIN</code>, <code>RIGHT JOIN</code> y <code>FULL JOIN</code>. Cada uno de estos es un tipo
+                de <code>OUTER JOIN</code>.
+            </p>
+        </li>
+        <li>
+            <p>Un <code>LEFT JOIN</code> prioriza los datos en la tabla izquierda (o primera).</p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT *
 FROM &quot;leones_marinos&quot;
 LEFT JOIN &quot;migraciones&quot; ON &quot;migraciones&quot;.&quot;id&quot; = &quot;leones_marinos&quot;.&quot;id&quot;;
 </code></pre>
-<p>Esta consulta retendria todos los datos de leones marinos de la tabla <code>leones_marinos</code> — la izquierda. Algunas filas en la tabla unida podrian estar parcialmente vacias. Esto ocurriria si la tabla derecha no tuviera datos para un ID particular.</p>
-<ul>
-<li>Similarmente, un <code>RIGHT JOIN</code> retiene todas las filas de la tabla derecha (o segunda). Un <code>FULL JOIN</code> nos permite ver la totalidad de todas las tablas.</li>
-<li>Como podemos observar, un <code>OUTER JOIN</code> podria llevar a valores vacios o <code>NULL</code> en la tabla unida.</li>
-<li>Ambas tablas en la base de datos de leones marinos tienen la columna <code>id</code>. Dado que el valor sobre el cual estamos uniendo las tablas tiene el mismo nombre de columna en ambas tablas, podemos omitir la seccion <code>ON</code> de la consulta al unir.</li>
-</ul>
-<pre><code class="language-sql">SELECT *
+    <p>Esta consulta retendria todos los datos de leones marinos de la tabla <code>leones_marinos</code> — la izquierda.
+        Algunas filas en la tabla unida podrian estar parcialmente vacias. Esto ocurriria si la tabla derecha no tuviera
+        datos para un ID particular.</p>
+    <ul>
+        <li>Similarmente, un <code>RIGHT JOIN</code> retiene todas las filas de la tabla derecha (o segunda). Un
+            <code>FULL JOIN</code> nos permite ver la totalidad de todas las tablas.
+        </li>
+        <li>Como podemos observar, un <code>OUTER JOIN</code> podria llevar a valores vacios o <code>NULL</code> en la
+            tabla unida.</li>
+        <li>Ambas tablas en la base de datos de leones marinos tienen la columna <code>id</code>. Dado que el valor
+            sobre el cual estamos uniendo las tablas tiene el mismo nombre de columna en ambas tablas, podemos omitir la
+            seccion <code>ON</code> de la consulta al unir.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT *
 FROM &quot;leones_marinos&quot;
 NATURAL JOIN &quot;migraciones&quot;;
 </code></pre>
-<p>Nota que el resultado no tiene una columna <code>id</code> duplicada en este caso. Ademas, esta union funciona de manera similar a un <code>INNER JOIN</code>.</p>
-<h3>Preguntas</h3>
-<blockquote>
-<p>En la base de datos de leones marinos, ¿como se crean los IDs? ¿Vienen de la tabla <code>leones_marinos</code> o de la tabla <code>migraciones</code>?</p>
-</blockquote>
-<ul>
-<li>El ID de cada leon marino probablemente provino de investigadores que rastrean los patrones de migracion de estos leones marinos. Es decir, los IDs no se generaron en ninguna de las tablas, sino que se asignaron en la fuente de los datos mismos.</li>
-</ul>
-<blockquote>
-<p>Si estamos tratando de unir tres tablas, ¿como podemos saber cuales son las tablas izquierda o derecha?</p>
-</blockquote>
-<ul>
-<li>Para cada sentencia <code>JOIN</code>, la primera tabla antes de la palabra clave es la izquierda. La que esta involucrada en la palabra clave <code>JOIN</code> es la tabla derecha.</li>
-</ul>
-<blockquote>
-<p>Cuando unimos tablas, ¿la tabla unida resultante se guarda? ¿Podemos referenciarla despues sin unir de nuevo?</p>
-</blockquote>
-<ul>
-<li>En la forma en que estamos usando <code>JOIN</code>, el resultado es una tabla temporal o un conjunto de resultados. Puede usarse durante la duracion de la consulta.</li>
-</ul>
-<blockquote>
-<p>Hay muchos tipos diferentes de <code>JOIN</code>. ¿Hay alguno por defecto que deberiamos usar?</p>
-</blockquote>
-<ul>
-<li>El tipo mas simple — simplemente <code>JOIN</code> — es en realidad un <code>INNER JOIN</code> y ese es el predeterminado para SQL.</li>
-</ul>
-<hr />
-<h2>Conjuntos</h2>
-<ul>
-<li>
-<p>Antes de sumergirnos en conjuntos, necesitaremos volver a la base de datos de libros (<code>sql_teach</code>).</p>
-</li>
-<li>
-<p>Al ejecutar una consulta, los resultados que vemos se llaman un conjunto de resultados. Este es un tipo de conjunto en SQL.</p>
-</li>
-<li>
-<p>Tomemos otro ejemplo. En nuestra base de datos de libros, tenemos autores y traductores. Una persona podria ser autor o traductor. Si los dos conjuntos tienen una interseccion, tambien es posible que una persona pueda ser tanto autor como traductor de libros. Podemos usar el operador <code>INTERSECT</code> para encontrar este conjunto.</p>
-<p><img src="/static/images/p100.jpg" alt="Conjunto Interseccion de Autores y Traductores" /></p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;traductores&quot;
+    <p>Nota que el resultado no tiene una columna <code>id</code> duplicada en este caso. Ademas, esta union funciona de
+        manera similar a un <code>INNER JOIN</code>.</p>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>En la base de datos de leones marinos, ¿como se crean los IDs? ¿Vienen de la tabla
+            <code>leones_marinos</code> o de la tabla <code>migraciones</code>?
+        </p>
+    </blockquote>
+    <ul>
+        <li>El ID de cada leon marino probablemente provino de investigadores que rastrean los patrones de migracion de
+            estos leones marinos. Es decir, los IDs no se generaron en ninguna de las tablas, sino que se asignaron en
+            la fuente de los datos mismos.</li>
+    </ul>
+    <blockquote>
+        <p>Si estamos tratando de unir tres tablas, ¿como podemos saber cuales son las tablas izquierda o derecha?</p>
+    </blockquote>
+    <ul>
+        <li>Para cada sentencia <code>JOIN</code>, la primera tabla antes de la palabra clave es la izquierda. La que
+            esta involucrada en la palabra clave <code>JOIN</code> es la tabla derecha.</li>
+    </ul>
+    <blockquote>
+        <p>Cuando unimos tablas, ¿la tabla unida resultante se guarda? ¿Podemos referenciarla despues sin unir de nuevo?
+        </p>
+    </blockquote>
+    <ul>
+        <li>En la forma en que estamos usando <code>JOIN</code>, el resultado es una tabla temporal o un conjunto de
+            resultados. Puede usarse durante la duracion de la consulta.</li>
+    </ul>
+    <blockquote>
+        <p>Hay muchos tipos diferentes de <code>JOIN</code>. ¿Hay alguno por defecto que deberiamos usar?</p>
+    </blockquote>
+    <ul>
+        <li>El tipo mas simple — simplemente <code>JOIN</code> — es en realidad un <code>INNER JOIN</code> y ese es el
+            predeterminado para SQL.</li>
+    </ul>
+    <hr />
+    <h2>Conjuntos</h2>
+    <ul>
+        <li>
+            <p>Antes de sumergirnos en conjuntos, necesitaremos volver a la base de datos de libros
+                (<code>sql_teach</code>).</p>
+        </li>
+        <li>
+            <p>Al ejecutar una consulta, los resultados que vemos se llaman un conjunto de resultados. Este es un tipo
+                de conjunto en SQL.</p>
+        </li>
+        <li>
+            <p>Tomemos otro ejemplo. En nuestra base de datos de libros, tenemos autores y traductores. Una persona
+                podria ser autor o traductor. Si los dos conjuntos tienen una interseccion, tambien es posible que una
+                persona pueda ser tanto autor como traductor de libros. Podemos usar el operador <code>INTERSECT</code>
+                para encontrar este conjunto.</p>
+            <p><img src="/static/images/p100.jpg" alt="Conjunto Interseccion de Autores y Traductores" /></p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;traductores&quot;
 INTERSECT
 SELECT &quot;nombre&quot; FROM &quot;autores&quot;;
 </code></pre>
-<ul>
-<li>
-<p>Si una persona es autor o traductor, o ambos, pertenece a la union de los dos conjuntos. En otras palabras, este conjunto se forma combinando los conjuntos de autor y traductor.</p>
-<p><img src="/static/images/p102.jpg" alt="Conjunto Union de Autores y Traductores" /></p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;traductores&quot;
+    <ul>
+        <li>
+            <p>Si una persona es autor o traductor, o ambos, pertenece a la union de los dos conjuntos. En otras
+                palabras, este conjunto se forma combinando los conjuntos de autor y traductor.</p>
+            <p><img src="/static/images/p102.jpg" alt="Conjunto Union de Autores y Traductores" /></p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;traductores&quot;
 UNION
 SELECT &quot;nombre&quot; FROM &quot;autores&quot;;
 </code></pre>
-<p>¡Observa que cada autor y cada traductor esta incluido en este conjunto de resultados, pero solo una vez!</p>
-<ul>
-<li>Un ajuste menor a la consulta anterior nos da la profesion de la persona en el conjunto de resultados, basado en si son autor o traductor.</li>
-</ul>
-<pre><code class="language-sql">SELECT 'autor' AS &quot;profesion&quot;, &quot;nombre&quot;
+    <p>¡Observa que cada autor y cada traductor esta incluido en este conjunto de resultados, pero solo una vez!</p>
+    <ul>
+        <li>Un ajuste menor a la consulta anterior nos da la profesion de la persona en el conjunto de resultados,
+            basado en si son autor o traductor.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT 'autor' AS &quot;profesion&quot;, &quot;nombre&quot;
 FROM &quot;autores&quot;
 UNION
 SELECT 'traductor' AS &quot;profesion&quot;, &quot;nombre&quot;
 FROM &quot;traductores&quot;;
 </code></pre>
-<ul>
-<li>
-<p>Todos los que son autores y <em>solo</em> autores estan incluidos en el siguiente conjunto. La palabra clave <code>EXCEPT</code> puede usarse para encontrar dicho conjunto. En otras palabras, el conjunto de traductores se resta del conjunto de autores para formar este.</p>
-<p><img src="/static/images/p104.jpg" alt="Conjunto EXCEPT incluyendo personas que son solo autores" /></p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;autores&quot;
+    <ul>
+        <li>
+            <p>Todos los que son autores y <em>solo</em> autores estan incluidos en el siguiente conjunto. La palabra
+                clave <code>EXCEPT</code> puede usarse para encontrar dicho conjunto. En otras palabras, el conjunto de
+                traductores se resta del conjunto de autores para formar este.</p>
+            <p><img src="/static/images/p104.jpg" alt="Conjunto EXCEPT incluyendo personas que son solo autores" /></p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;nombre&quot; FROM &quot;autores&quot;
 EXCEPT
 SELECT &quot;nombre&quot; FROM &quot;traductores&quot;;
 </code></pre>
-<p>Podemos verificar que ningun autor-traductor del conjunto interseccion aparece en este conjunto de resultados.</p>
-<ul>
-<li>
-<p>Similarmente, es posible encontrar un conjunto de personas que son solo traductoras usando <code>EXCEPT</code>.</p>
-</li>
-<li>
-<p>¿Como podemos encontrar este conjunto de personas que son autores o traductores pero no ambos?</p>
-<p><img src="/static/images/p107.jpg" alt="Conjunto — personas que son autores o traductores pero no ambos" /></p>
-</li>
-<li>
-<p>Estos operadores podrian ser utiles para responder muchas preguntas diferentes. Por ejemplo, podemos encontrar los libros que Sophie Hughes y Margaret Jull Costa han traducido juntas.</p>
-</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;libro_id&quot; FROM &quot;traduccion&quot;
+    <p>Podemos verificar que ningun autor-traductor del conjunto interseccion aparece en este conjunto de resultados.
+    </p>
+    <ul>
+        <li>
+            <p>Similarmente, es posible encontrar un conjunto de personas que son solo traductoras usando
+                <code>EXCEPT</code>.
+            </p>
+        </li>
+        <li>
+            <p>¿Como podemos encontrar este conjunto de personas que son autores o traductores pero no ambos?</p>
+            <p><img src="/static/images/p107.jpg"
+                    alt="Conjunto — personas que son autores o traductores pero no ambos" /></p>
+        </li>
+        <li>
+            <p>Estos operadores podrian ser utiles para responder muchas preguntas diferentes. Por ejemplo, podemos
+                encontrar los libros que Sophie Hughes y Margaret Jull Costa han traducido juntas.</p>
+        </li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;libro_id&quot; FROM &quot;traduccion&quot;
 WHERE &quot;traductor_id&quot; = (
     SELECT &quot;id&quot; FROM &quot;traductores&quot;
     WHERE &quot;nombre&quot; = 'Sophie Hughes'
@@ -474,65 +603,87 @@ WHERE &quot;traductor_id&quot; = (
     WHERE &quot;nombre&quot; = 'Margaret Jull Costa'
 );
 </code></pre>
-<p>Cada una de las consultas anidadas aqui encuentra los IDs de los libros para un traductor. La palabra clave <code>INTERSECT</code> se usa para intersectar los conjuntos resultantes y darnos los libros en los que han colaborado.</p>
-<h3>Preguntas</h3>
-<blockquote>
-<p>¿Podriamos usar <code>INTERSECT</code>, <code>UNION</code> etc. para realizar operaciones en 3-4 conjuntos?</p>
-</blockquote>
-<ul>
-<li>Si, absolutamente. Para intersectar 3 conjuntos, tendriamos que usar el operador <code>INTERSECT</code> dos veces. Una nota importante — tenemos que asegurarnos de tener el mismo numero y los mismos tipos de columnas en los conjuntos a combinar usando <code>INTERSECT</code>, <code>UNION</code> etc.</li>
-</ul>
-<hr />
-<h2>Grupos</h2>
-<ul>
-<li>Considera la tabla <code>puntuaciones</code>. Para cada libro, queremos encontrar la puntuacion promedio del libro. Para hacer esto, primero necesitariamos agrupar las puntuaciones por libro y luego promediar las puntuaciones para cada libro (cada grupo).</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;libro_id&quot;, AVG(&quot;puntuacion&quot;) AS &quot;puntuacion promedio&quot;
+    <p>Cada una de las consultas anidadas aqui encuentra los IDs de los libros para un traductor. La palabra clave
+        <code>INTERSECT</code> se usa para intersectar los conjuntos resultantes y darnos los libros en los que han
+        colaborado.
+    </p>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>¿Podriamos usar <code>INTERSECT</code>, <code>UNION</code> etc. para realizar operaciones en 3-4 conjuntos?
+        </p>
+    </blockquote>
+    <ul>
+        <li>Si, absolutamente. Para intersectar 3 conjuntos, tendriamos que usar el operador <code>INTERSECT</code> dos
+            veces. Una nota importante — tenemos que asegurarnos de tener el mismo numero y los mismos tipos de columnas
+            en los conjuntos a combinar usando <code>INTERSECT</code>, <code>UNION</code> etc.</li>
+    </ul>
+    <hr />
+    <h2>Grupos</h2>
+    <ul>
+        <li>Considera la tabla <code>puntuaciones</code>. Para cada libro, queremos encontrar la puntuacion promedio del
+            libro. Para hacer esto, primero necesitariamos agrupar las puntuaciones por libro y luego promediar las
+            puntuaciones para cada libro (cada grupo).</li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;libro_id&quot;, AVG(&quot;puntuacion&quot;) AS &quot;puntuacion promedio&quot;
 FROM &quot;puntuaciones&quot;
 GROUP BY &quot;libro_id&quot;;
 </code></pre>
-<p>¡En esta consulta, se uso la palabra clave <code>GROUP BY</code> para crear grupos para cada libro y luego colapsar las puntuaciones del grupo en una puntuacion promedio!</p>
-<ul>
-<li>Ahora, solo queremos ver los libros que estan bien valorados, con una puntuacion promedio superior a 4.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;libro_id&quot;, ROUND(AVG(&quot;puntuacion&quot;)::numeric, 2) AS &quot;puntuacion promedio&quot;
+    <p>¡En esta consulta, se uso la palabra clave <code>GROUP BY</code> para crear grupos para cada libro y luego
+        colapsar las puntuaciones del grupo en una puntuacion promedio!</p>
+    <ul>
+        <li>Ahora, solo queremos ver los libros que estan bien valorados, con una puntuacion promedio superior a 4.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;libro_id&quot;, ROUND(AVG(&quot;puntuacion&quot;)::numeric, 2) AS &quot;puntuacion promedio&quot;
 FROM &quot;puntuaciones&quot;
 GROUP BY &quot;libro_id&quot;
 HAVING AVG(&quot;puntuacion&quot;) &gt; 4.0;
 </code></pre>
-<p>Nota que la palabra clave <code>HAVING</code> se usa aqui para especificar una condicion para los grupos, en lugar de <code>WHERE</code> (que solo puede usarse para especificar condiciones para filas individuales).</p>
-<h3>Preguntas</h3>
-<blockquote>
-<p>¿Es posible ver el numero de puntuaciones dadas a cada libro?</p>
-</blockquote>
-<ul>
-<li>Si, esto requeriria una ligera modificacion con el uso de la palabra clave <code>COUNT</code>.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;libro_id&quot;, COUNT(&quot;puntuacion&quot;)
+    <p>Nota que la palabra clave <code>HAVING</code> se usa aqui para especificar una condicion para los grupos, en
+        lugar de <code>WHERE</code> (que solo puede usarse para especificar condiciones para filas individuales).</p>
+    <h3>Preguntas</h3>
+    <blockquote>
+        <p>¿Es posible ver el numero de puntuaciones dadas a cada libro?</p>
+    </blockquote>
+    <ul>
+        <li>Si, esto requeriria una ligera modificacion con el uso de la palabra clave <code>COUNT</code>.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;libro_id&quot;, COUNT(&quot;puntuacion&quot;)
 FROM &quot;puntuaciones&quot;
 GROUP BY &quot;libro_id&quot;;
 </code></pre>
-<blockquote>
-<p>¿Tambien es posible ordenar los datos obtenidos aqui?</p>
-</blockquote>
-<ul>
-<li>Si, lo es. Digamos que quisieramos encontrar las puntuaciones promedio por libro bien valorado, ordenadas en orden descendente.</li>
-</ul>
-<pre><code class="language-sql">SELECT &quot;libro_id&quot;, ROUND(AVG(&quot;puntuacion&quot;)::numeric, 2) AS &quot;puntuacion promedio&quot;
+    <blockquote>
+        <p>¿Tambien es posible ordenar los datos obtenidos aqui?</p>
+    </blockquote>
+    <ul>
+        <li>Si, lo es. Digamos que quisieramos encontrar las puntuaciones promedio por libro bien valorado, ordenadas en
+            orden descendente.</li>
+    </ul>
+    <pre><code class="language-sql">SELECT &quot;libro_id&quot;, ROUND(AVG(&quot;puntuacion&quot;)::numeric, 2) AS &quot;puntuacion promedio&quot;
 FROM &quot;puntuaciones&quot;
 GROUP BY &quot;libro_id&quot;
 HAVING AVG(&quot;puntuacion&quot;) &gt; 4.0
 ORDER BY &quot;puntuacion promedio&quot; DESC;
 </code></pre>
-<hr />
-<h2>Fin</h2>
-<ul>
-<li>¡Esto nos lleva a la conclusion de la Clase 1 sobre Relaciones (Relating) en SQL! Para salir del prompt de psql, puedes escribir <code>\q</code> y esto te llevara de vuelta a la terminal regular.</li>
-<li>¡Hasta la proxima vez!</li>
-</ul>
-<hr />
-<p><strong>Fuente:</strong> CS50 SQL - Lecture 1: Relating. Harvard University. https://cs50.harvard.edu/sql/notes/1/</p>
-<p>Este material esta disponible bajo la licencia MIT.</p>
+    <hr />
+    <h2>Fin</h2>
+    <ul>
+        <li>¡Esto nos lleva a la conclusion de la Clase 1 sobre Relaciones (Relating) en SQL! Para salir del prompt de
+            psql, puedes escribir <code>\q</code> y esto te llevara de vuelta a la terminal regular.</li>
+        <li>¡Hasta la proxima vez!</li>
+    </ul>
+    <hr />
+    <div class="video-reference" style="margin: 20px 0; text-align: center;">
+        <iframe width="560" height="315" src="https://video.cs50.io/_2t18Hy9Z0Y" title="YouTube video player"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="max-width: 100%;"></iframe>
+        <p><a href="https://www.youtube.com/watch?v=vHYeChEf2lA" target="_blank">Ver video de la clase en YouTube</a>
+        </p>
+    </div>
+    <hr />
+    <p><strong>Fuente:</strong> CS50 SQL - Lecture 1: Relating. Harvard University.
+        https://cs50.harvard.edu/sql/notes/1/</p>
+    <p>Este material esta disponible bajo la licencia MIT.</p>
 
 </div>
 {% endblock %}
