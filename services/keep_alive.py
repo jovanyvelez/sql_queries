@@ -3,7 +3,7 @@ import logging
 
 from sqlalchemy import text
 
-from app.database import AsyncSessionLocal
+from database import AsyncSessionLocal
 
 logger = logging.getLogger("uvicorn")
 
