@@ -5,20 +5,25 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_db
-from services.rate_limit import limitar_consulta
-from services.validador_sql import validar_consulta
-from templating import templates
+from ..database import get_db
+from ..services.rate_limit import limitar_consulta
+from ..services.validador_sql import validar_consulta
+from ..templating import templates
 
 router = APIRouter()
 
 
 @router.get("/consola", response_class=HTMLResponse)
 async def consola_get(request: Request, sql: str = Query("")):
-    return templates.TemplateResponse(request, "consola.html", {
-        "error": None, "resultado": None,
-        "sql_anterior": unquote(sql) if sql else None,
-    })
+    return templates.TemplateResponse(
+        request,
+        "consola.html",
+        {
+            "error": None,
+            "resultado": None,
+            "sql_anterior": unquote(sql) if sql else None,
+        },
+    )
 
 
 @router.post("/consulta", response_class=HTMLResponse)
@@ -29,9 +34,15 @@ async def ejecutar_consulta_usuario(
     _rate: None = Depends(limitar_consulta),
 ):
     if not sql.strip():
-        return templates.TemplateResponse(request, "consola.html", {
-            "error": None, "resultado": None, "sql_anterior": None,
-        })
+        return templates.TemplateResponse(
+            request,
+            "consola.html",
+            {
+                "error": None,
+                "resultado": None,
+                "sql_anterior": None,
+            },
+        )
 
     error = None
     resultado = None
@@ -44,11 +55,21 @@ async def ejecutar_consulta_usuario(
                 filas = result.mappings().all()
                 resultado = [dict(f) for f in filas[:50]]
             else:
-                resultado = [{"mensaje": "Consulta ejecutada correctamente (sin filas de retorno)."}]
+                resultado = [
+                    {
+                        "mensaje": "Consulta ejecutada correctamente (sin filas de retorno)."
+                    }
+                ]
             await tx.rollback()
     except Exception as e:
         error = str(e)
 
-    return templates.TemplateResponse(request, "consola.html", {
-        "error": error, "resultado": resultado, "sql_anterior": sql,
-    })
+    return templates.TemplateResponse(
+        request,
+        "consola.html",
+        {
+            "error": error,
+            "resultado": resultado,
+            "sql_anterior": sql,
+        },
+    )
