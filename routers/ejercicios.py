@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
-from ..services.clase0_ejercicios import ejercicios_clase0
-from ..services.clase1_ejercicios import ejercicios_clase1
-from ..templating import templates
+from services.clase0_ejercicios import ejercicios_clase0
+from services.clase1_ejercicios import ejercicios_clase1
+from templating import templates
 
 router = APIRouter()
 

@@ -7,10 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import get_db
-from .routers import clases, consola, ejercicios
-from .services.keep_alive import mantener_base_de_datos_viva
-from .templating import templates
+from database import get_db
+from routers import clases, consola, ejercicios
+from services.keep_alive import mantener_base_de_datos_viva
+from templating import templates
 
 
 # La capa gratuita de Neon suspende la base de datos tras inactividad.
