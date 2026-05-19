@@ -30,8 +30,8 @@ app = FastAPI(title="CS50 SQL — Adaptacion a PostgreSQL", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 
-app.include_router(clases.router)
-app.include_router(ejercicios.router)
+app.include_router(clases.router, prefix="/clases")
+app.include_router(ejercicios.router, prefix="/ejercicios")
 app.include_router(consola.router)
 
 
