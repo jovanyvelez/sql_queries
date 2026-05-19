@@ -1,16 +1,20 @@
 import asyncio
+import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import engine
-from services.keep_alive import mantener_base_de_datos_viva
-from templating import templates
-from routers import clases, ejercicios, consola
+from app.database import get_db
+from app.services.keep_alive import mantener_base_de_datos_viva
+from app.templating import templates
+from app.routers import clases, ejercicios, consola
 
 
 # La capa gratuita de Neon suspende la base de datos tras inactividad.
@@ -37,10 +41,9 @@ async def index(request: Request):
 
 
 @app.get("/health")
-async def health():
+async def health(db: AsyncSession = Depends(get_db)):
     try:
-        async with engine.connect() as conn:
-            await conn.execute(text("SELECT 1"))
+        await db.execute(text("SELECT 1"))
         return JSONResponse({"status": "ok", "database": "connected"})
     except Exception:
         return JSONResponse({"status": "error", "database": "disconnected"}, status_code=503)

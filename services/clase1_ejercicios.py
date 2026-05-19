@@ -1,4 +1,4 @@
-from services.ejercicios import Ejercicio
+from app.services.ejercicios import Ejercicio
 
 
 def ejercicios_clase1() -> list[Ejercicio]:

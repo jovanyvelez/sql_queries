@@ -5,10 +5,10 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_db
-from services.rate_limit import limitar_consulta
-from services.validador_sql import validar_consulta
-from templating import templates
+from app.database import get_db
+from app.services.rate_limit import limitar_consulta
+from app.services.validador_sql import validar_consulta
+from app.templating import templates
 
 router = APIRouter()
 

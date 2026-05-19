@@ -17,7 +17,7 @@ La aplicacion incluye:
 
 | Componente | Tecnologia |
 |---|---|
-| Backend | Python 3.13 + FastAPI |
+| Backend | Python >= 3.12 + FastAPI |
 | Base de datos | PostgreSQL (Neon) |
 | ORM / driver | SQLAlchemy 2.0 + asyncpg |
 | CSS | Un solo archivo, modo oscuro |
@@ -43,13 +43,13 @@ La aplicacion se sirve en `http://localhost:8000`.
 
 ### Variables de entorno
 
-Copiar `.env` (no incluido en el repositorio) con:
+Copiar `.env-sample` a `.env` y editar con tu URL de conexion:
 
 ```
 DATABASE_URL=postgresql+asyncpg://usuario:password@host/basedatos?ssl=require
 ```
 
-Por defecto usa `localhost` con usuario `profesor` y base `sql_teach`.
+Por defecto (si no se define `DATABASE_URL`) usa `localhost` con base `sql_teach`.
 
 ## Estructura
 
@@ -58,18 +58,30 @@ app/
 ├── main.py                 # punto de entrada, lifespan, ruta /
 ├── templating.py            # Jinja2Templates compartido
 ├── database.py              # conexion a PostgreSQL
+├── requirements.txt         # dependencias (alternativa a pyproject.toml)
+├── datos.sql                # dump completo de la base de datos
 ├── routers/                 # rutas agrupadas por funcion
 │   ├── clases.py            # /clase0, /clase1
-│   ├── ejercicios.py        # /ejercicios/clase{0,1}, /respuestas
+│   ├── ejercicios.py        # /ejercicios/clase{0,1} y sus /respuestas
 │   └── consola.py           # /consola, POST /consulta
 ├── services/                # logica de negocio
-│   ├── clase0_ejercicios.py # ejercicios de la clase 0
-│   ├── clase1_ejercicios.py # ejercicios de la clase 1
+│   ├── ejercicios.py        # dataclass Ejercicio
+│   ├── clase0_ejercicios.py # 35 ejercicios de la clase 0
+│   ├── clase1_ejercicios.py # 32 ejercicios de la clase 1
 │   ├── keep_alive.py        # ping cada 4 min (capa gratuita Neon)
-│   └── validador_sql.py     # sanitizacion de consultas (solo SELECT)
+│   ├── rate_limit.py        # limite de consultas por IP
+│   └── validador_sql.py     # bloquea INSERT/UPDATE/DELETE/DROP...
 ├── templates/               # plantillas Jinja2
+│   ├── base.html            # layout comun + nav
+│   ├── index.html           # pagina de inicio
+│   ├── clase0.html          # clase 0 (HTML estatico)
+│   ├── clase1.html          # clase 1 (HTML estatico)
+│   ├── ejercicios.html      # lista de ejercicios
+│   ├── respuestas.html      # hoja de respuestas
+│   ├── consola.html         # consola SQL interactiva
+│   └── 500.html             # pagina de error 500
 └── static/
-    ├── estilos.css          # CSS unificado
+    ├── estilos.css          # CSS unificado (modo oscuro)
     └── images/              # imagenes del curso
 ```
 

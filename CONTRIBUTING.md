@@ -10,6 +10,7 @@ Gracias por tu interes en contribuir a este proyecto educativo.
 4. Ejecuta la app localmente y prueba que todo funcione:
    ```bash
    cd sql_harvard/app
+   cp .env-sample .env   # editar con tu DATABASE_URL
    uv run fastapi dev main.py
    ```
 5. Haz commit con mensajes descriptivos

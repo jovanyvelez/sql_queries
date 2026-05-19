@@ -36,6 +36,7 @@ app/
 ├── templating.py            # Jinja2Templates compartido entre routers
 ├── database.py              # Conexion a PostgreSQL via SQLAlchemy async
 ├── pyproject.toml           # Dependencias (uv)
+├── requirements.txt         # Dependencias (pip / Vercel)
 ├── .env-sample              # Plantilla de variables de entorno
 ├── datos.sql                # Dump completo de la BD (esquema + datos)
 ├── LICENSE                  # MIT
@@ -179,7 +180,7 @@ Las rutas estan agrupadas por funcion usando `APIRouter`:
 | Router | Rutas |
 |---|---|
 | `clases.py` | `GET /clase0`, `GET /clase1` |
-| `ejercicios.py` | `GET /ejercicios/clase0`, `/respuestas`, `/clase1`, `/respuestas` |
+| `ejercicios.py` | `GET /ejercicios/clase0`, `/ejercicios/clase0/respuestas`, `/ejercicios/clase1`, `/ejercicios/clase1/respuestas` |
 | `consola.py` | `GET /consola`, `POST /consulta` |
 
 `main.py` solo contiene `GET /`, `GET /health` y el `exception_handler` para 500.
