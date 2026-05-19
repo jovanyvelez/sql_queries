@@ -55,14 +55,14 @@ Por defecto (si no se define `DATABASE_URL`) usa `localhost` con base `sql_teach
 
 ```
 app/
-├── main.py                 # punto de entrada, lifespan, ruta /
+├── main.py                  # FastAPI app, lifespan, rutas / y /health
 ├── templating.py            # Jinja2Templates compartido
 ├── database.py              # conexion a PostgreSQL
-├── requirements.txt         # dependencias (alternativa a pyproject.toml)
+├── requirements.txt         # dependencias (pip / Vercel)
 ├── datos.sql                # dump completo de la base de datos
-├── routers/                 # rutas agrupadas por funcion
-│   ├── clases.py            # /clase0, /clase1
-│   ├── ejercicios.py        # /ejercicios/clase{0,1} y sus /respuestas
+├── routers/                 # rutas agrupadas con APIRouter y prefijos
+│   ├── clases.py            # prefijo /clases → /clases/clase0, /clases/clase1
+│   ├── ejercicios.py        # prefijo /ejercicios → /ejercicios/clase{0,1} y /respuestas
 │   └── consola.py           # /consola, POST /consulta
 ├── services/                # logica de negocio
 │   ├── ejercicios.py        # dataclass Ejercicio
@@ -84,6 +84,19 @@ app/
     ├── estilos.css          # CSS unificado (modo oscuro)
     └── images/              # imagenes del curso
 ```
+
+### Imports: compatibilidad local y Vercel
+
+Vercel copia los archivos a `/var/task/` sin la carpeta `app/`, por lo que los imports
+usan rutas planas (`from database import get_db` en vez de `from app.database import ...`).
+Para que funcione tambien en local, `main.py` ajusta `sys.path`:
+
+```python
+sys.path.insert(0, str(Path(__file__).parent))
+```
+
+Esto agrega la carpeta `app/` al path de Python, haciendo que los imports planos
+funcionen en ambos entornos.
 
 ## Seguridad
 
