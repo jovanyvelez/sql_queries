@@ -26,6 +26,12 @@ nav {
     z-index: 100;
 }
 
+nav .nav-links {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
 nav a {
     color: #8b949e;
     text-decoration: none;
@@ -660,4 +666,185 @@ h2 {
     font-size: 1.1rem;
     margin-bottom: 2rem;
     color: #c9d1d9;
+}
+
+/* ── hamburger ──────────────────────────────────────── */
+
+.hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 110;
+}
+
+.hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #e6edf3;
+    margin: 5px 0;
+    transition: all 0.3s;
+    border-radius: 1px;
+}
+
+.hamburger.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ── responsive ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    nav {
+        padding: 0.6rem 1rem;
+        flex-wrap: wrap;
+        gap: 0;
+    }
+
+    nav .brand {
+        font-size: 0.95rem;
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    nav .nav-links {
+        display: none;
+        width: 100%;
+        padding: 0.5rem 0;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    nav .nav-links.open {
+        display: flex;
+    }
+
+    nav .nav-links a {
+        padding: 0.7rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 0;
+    }
+
+    nav .nav-links a:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .container {
+        padding: 0 1rem;
+        margin: 1.5rem auto;
+    }
+
+    .clase-content {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .clase-content h1 {
+        font-size: 1.5rem;
+    }
+
+    .clase-content h2 {
+        font-size: 1.25rem;
+    }
+
+    .clase-content img {
+        max-width: 100%;
+    }
+
+    .clase-content pre {
+        padding: 1rem;
+        font-size: 0.82rem;
+    }
+
+    .toc {
+        padding: 1rem 1.25rem;
+    }
+
+    .consola-layout textarea {
+        min-height: 100px;
+        font-size: 0.88rem;
+    }
+
+    .consola-layout button {
+        padding: 0.65rem 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    .consola-layout .btn-row {
+        flex-direction: column;
+    }
+
+    .consola-layout th,
+    .consola-layout td {
+        padding: 0.35rem 0.5rem;
+        font-size: 0.82rem;
+    }
+
+    .ejercicios-barra {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ejercicio-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .card-header {
+        padding: 0.6rem 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .respuesta-sql {
+        padding: 0.75rem 1rem;
+        font-size: 0.82rem;
+    }
+
+    .boton-secundario,
+    .boton-barra {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 480px) {
+    nav .brand {
+        font-size: 0.85rem;
+    }
+
+    .clase-content {
+        padding: 1.25rem 1rem;
+    }
+
+    .clase-content h1 {
+        font-size: 1.3rem;
+    }
+
+    .clase-content pre {
+        font-size: 0.78rem;
+        padding: 0.75rem;
+    }
+
+    .consola-layout table {
+        font-size: 0.75rem;
+    }
+
+    .consola-layout th,
+    .consola-layout td {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
 }

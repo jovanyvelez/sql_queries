@@ -35,7 +35,6 @@ psql -U tu_usuario -d tu_base < datos.sql
 ## Ejecutar localmente
 
 ```bash
-cd app
 uv run fastapi dev main.py
 ```
 
@@ -54,7 +53,6 @@ Por defecto (si no se define `DATABASE_URL`) usa `localhost` con base `sql_teach
 ## Estructura
 
 ```
-app/
 ├── main.py                  # FastAPI app, lifespan, rutas / y /health
 ├── templating.py            # Jinja2Templates compartido
 ├── database.py              # conexion a PostgreSQL
@@ -84,19 +82,6 @@ app/
     ├── estilos.css          # CSS unificado (modo oscuro)
     └── images/              # imagenes del curso
 ```
-
-### Imports: compatibilidad local y Vercel
-
-Vercel copia los archivos a `/var/task/` sin la carpeta `app/`, por lo que los imports
-usan rutas planas (`from database import get_db` en vez de `from app.database import ...`).
-Para que funcione tambien en local, `main.py` ajusta `sys.path`:
-
-```python
-sys.path.insert(0, str(Path(__file__).parent))
-```
-
-Esto agrega la carpeta `app/` al path de Python, haciendo que los imports planos
-funcionen en ambos entornos.
 
 ## Seguridad
 
