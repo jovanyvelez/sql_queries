@@ -1,5 +1,11 @@
 import asyncio
+import os
+import sys
 from contextlib import asynccontextmanager
+
+# Garantiza que el directorio del proyecto esté en sys.path,
+# tanto en Vercel (script directo) como en local (uvicorn/fastapi dev).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
