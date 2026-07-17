@@ -1,12 +1,93 @@
 {% extends "base.html" %}
 {% block title %}Ejercicios Clase {{ clase_num }} — CS50 SQL{% endblock %}
+{% block extra_css %}
+<style>
+    .ejercicio-solucion {
+        margin-top: 0.75rem;
+        border-top: 1px solid #30363d;
+        padding-top: 0.75rem;
+    }
+    .ejercicio-solucion summary {
+        cursor: pointer;
+        color: #58a6ff;
+        font-size: 0.9rem;
+        user-select: none;
+        padding: 0.3rem 0;
+    }
+    .ejercicio-solucion summary:hover { text-decoration: underline; }
+    .ejercicio-solucion[open] summary { margin-bottom: 0.75rem; }
+
+    .solucion-editor-wrapper { margin: 0.75rem 0; }
+    .solucion-acciones { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+    .btn-probar {
+        background: #238636; color: white; border: none; border-radius: 6px;
+        padding: 0.5rem 1.1rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-probar:hover { background: #2ea043; }
+    .btn-probar:disabled { opacity: 0.5; cursor: wait; }
+    .btn-pista {
+        background: #21262d; color: #e6edf3; border: 1px solid #30363d; border-radius: 6px;
+        padding: 0.5rem 1rem; font-size: 0.85rem; cursor: pointer; font-family: inherit;
+    }
+    .btn-pista:hover { background: #30363d; }
+
+    .solucion-feedback { margin-top: 0.75rem; }
+    .feedback-badge {
+        display: inline-block; padding: 0.25rem 0.7rem; border-radius: 4px;
+        font-weight: 600; font-size: 0.85rem; margin-bottom: 0.5rem;
+    }
+    .feedback-ok { background: #04260e; color: #3fb950; border: 1px solid #238636; }
+    .feedback-error { background: #490202; color: #f85149; border: 1px solid #f85149; }
+    .feedback-warning { background: #2b2300; color: #d2991d; border: 1px solid #d2991d; }
+
+    .feedback-msg { color: #c9d1d9; font-size: 0.88rem; margin-bottom: 0.5rem; }
+
+    .comparacion-tablas {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;
+    }
+    @media (max-width: 768px) { .comparacion-tablas { grid-template-columns: 1fr; } }
+    .comparacion-col h4 {
+        font-size: 0.85rem; color: #8b949e; margin-bottom: 0.4rem; font-weight: 600;
+    }
+    .comparacion-col .tabla-comparacion {
+        width: 100%; border-collapse: collapse; font-size: 0.78rem;
+        table-layout: fixed;
+    }
+    .comparacion-col .tabla-comparacion th {
+        background: #21262d; color: #e6edf3; padding: 0.35rem 0.45rem; text-align: left;
+        position: sticky; top: 0; overflow: hidden; text-overflow: ellipsis;
+    }
+    .comparacion-col .tabla-comparacion td {
+        padding: 0.3rem 0.45rem; color: #c9d1d9; border-bottom: 1px solid #21262d;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .comparacion-wrapper {
+        max-height: 280px; overflow: auto; border: 1px solid #30363d; border-radius: 6px;
+    }
+    .pista-cuerpo {
+        margin-top: 0.5rem; background: #0d1117; color: #e6edf3;
+        padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid #30363d;
+        font-family: "Consolas", "Monaco", "Courier New", monospace;
+        font-size: 0.82rem; line-height: 1.5; overflow-x: auto; white-space: pre;
+    }
+    .ejercicio-estado {
+        display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.5rem;
+        border-radius: 4px; margin-left: 0.5rem;
+    }
+    .estado-resuelto { background: #04260e; color: #3fb950; }
+    .cm-ejercicio { max-height: 120px; border: 1px solid #30363d; border-radius: 6px; }
+    .cm-ejercicio.cm-focused { border-color: #58a6ff; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>Ejercicios — Clase {{ clase_num }}: {{ clase_titulo }}</h1>
 
 <div class="ejercicios-barra">
     <p>
         {{ ejercicios | length }} ejercicios para practicar.
-        Escribe cada consulta en la <a href="/consola">consola SQL</a>.
+        Escribe cada consulta en su caja y pulsa <strong>Probar mi SQL</strong>.
+        También puedes usar la <a href="/consola">consola SQL</a>.
     </p>
     <a href="/ejercicios/clase{{ clase_num }}/respuestas" class="boton-barra">
         Ver hoja de respuestas
@@ -14,12 +95,28 @@
 </div>
 
 {% for e in ejercicios %}
-<div class="card card-{{ e.dificultad }}" id="{{ e.id }}">
+<div class="card card-{{ e.dificultad }}" id="{{ e.id }}" data-orden-importa="{{ e.orden_importa }}">
     <div class="ejercicio-card">
-        <h3>{{ e.numero }}. {{ e.titulo }}</h3>
+        <h3>{{ e.numero }}. {{ e.titulo }}
+            <span class="ejercicio-estado" data-estado-id="{{ e.id }}" hidden></span>
+        </h3>
         <span class="badge badge-{{ e.dificultad }}">{{ e.dificultad }}</span>
     </div>
     <p class="ejercicio-enunciado">{{ e.enunciado }}</p>
+
+    <details class="ejercicio-solucion" data-ejercicio-id="{{ e.id }}">
+        <summary>Tu solución ▾</summary>
+        <div class="solucion-editor-wrapper">
+            <textarea class="solucion-textarea" data-ejercicio-id="{{ e.id }}"
+                placeholder="Escribe aqui tu consulta SQL…"></textarea>
+        </div>
+        <div class="solucion-acciones">
+            <button type="button" class="btn-probar" data-ejercicio-id="{{ e.id }}">Probar mi SQL</button>
+            <button type="button" class="btn-pista" data-ejercicio-id="{{ e.id }}">Ver pista</button>
+        </div>
+        <div class="solucion-feedback" data-feedback-id="{{ e.id }}" hidden></div>
+        <pre class="pista-cuerpo" data-pista-id="{{ e.id }}" hidden>{{ e.sql }}</pre>
+    </details>
 </div>
 {% endfor %}
 
@@ -28,4 +125,11 @@
         Ver hoja de respuestas
     </a>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/dracula.min.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/sql/sql.min.js"></script>
+<script src="/static/ejercicios.js"></script>
 {% endblock %}

@@ -1,5 +1,33 @@
 {% extends "base.html" %}
 {% block title %}CS50 SQL — Esquema de tablas{% endblock %}
+{% block extra_css %}
+<style>
+    .tablas-toolbar {
+        display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+    .tablas-toolbar input[type="search"] {
+        flex: 1; min-width: 220px; max-width: 480px;
+        background: #161b22; color: #e6edf3; border: 1px solid #30363d;
+        border-radius: 8px; padding: 0.6rem 0.9rem; font-size: 0.9rem;
+        font-family: inherit;
+    }
+    .tablas-toolbar input[type="search"]:focus-visible {
+        outline: 2px solid #58a6ff; outline-offset: 1px; border-color: transparent;
+    }
+    .tablas-count { color: #8b949e; font-size: 0.85rem; }
+    .tabla-card.hidden { display: none; }
+
+    .er-diagram {
+        background: #161b22; padding: 1.25rem; border-radius: 10px;
+        border: 1px solid #30363d; margin-bottom: 2rem; overflow-x: auto;
+    }
+    .er-diagram h3 {
+        margin: 0 0 0.75rem 0; font-size: 1rem; color: #e6edf3;
+    }
+    .er-diagram .mermaid { background: transparent; }
+</style>
+{% endblock %}
 {% block content %}
 <h1>Esquema de la base de datos <code>sql_teach</code></h1>
 
@@ -8,23 +36,43 @@
     <code>NULL</code> y sus valores por defecto.
 </p>
 
+{% if relaciones %}
+<div class="er-diagram">
+    <h3>Diagrama Entidad-Relación</h3>
+    <div class="mermaid">
+erDiagram
+{% for nombre, columnas in tablas.items() %}{{ nombre }} {
+{% for col in columnas %}    {{ col.tipo }} {{ col.columna }}
+{% endfor %}
+}
+{% endfor %}{% for r in relaciones %}{{ r.origen_tabla }} }o--|| {{ r.destino_tabla }} : "{{ r.origen_col }}→{{ r.destino_col }}"
+{% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="tablas-toolbar">
+    <input type="search" id="buscador-tablas" placeholder="Filtra por tabla o columna…" aria-label="Buscar tabla o columna" autocomplete="off">
+    <span id="tablas-count" class="tablas-count"></span>
+</div>
+
 {% for nombre, columnas in tablas.items() %}
-<div class="card" style="margin-bottom: 1.5rem;">
+<div class="card tabla-card" data-tabla="{{ nombre|lower }}" style="margin-bottom: 1.5rem;">
     <div class="card-header"><h3>{{ nombre }}</h3></div>
     <div class="card-body">
         <table>
             <thead>
                 <tr>
-                    <th>Columna</th>
-                    <th>Tipo</th>
-                    <th>¿Acepta NULL?</th>
-                    <th>Valor por defecto</th>
+                    <th scope="col">Columna</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">¿Acepta NULL?</th>
+                    <th scope="col">Valor por defecto</th>
                 </tr>
             </thead>
             <tbody>
                 {% for col in columnas %}
-                <tr>
-                    <td><strong>{{ col.columna }}</strong></td>
+                <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
+                    <td scope="row"><strong>{{ col.columna }}</strong></td>
                     <td><code>{{ col.tipo }}</code></td>
                     <td>{{ col.nulo }}</td>
                     <td>{{ col.defecto }}</td>
@@ -35,4 +83,34 @@
     </div>
 </div>
 {% endfor %}
+
+<script>
+(function () {
+    "use strict";
+    var input = document.getElementById("buscador-tablas");
+    var count = document.getElementById("tablas-count");
+    var cards = Array.from(document.querySelectorAll(".tabla-card"));
+    function actualizar() {
+        var q = input.value.trim().toLowerCase();
+        var visibles = 0;
+        cards.forEach(function (card) {
+            var tabla = card.getAttribute("data-tabla");
+            var filas = Array.from(card.querySelectorAll("tbody tr"));
+            var algunaFilaVisible = false;
+            filas.forEach(function (f) {
+                var col = f.getAttribute("data-col");
+                var match = !q || col.indexOf(q) !== -1 || tabla.indexOf(q) !== -1;
+                f.style.display = match ? "" : "none";
+                if (match) algunaFilaVisible = true;
+            });
+            var cardMatch = !q || tabla.indexOf(q) !== -1 || algunaFilaVisible;
+            card.classList.toggle("hidden", !cardMatch);
+            if (cardMatch) visibles++;
+        });
+        if (count) count.textContent = visibles + " / " + cards.length + " tablas";
+    }
+    input.addEventListener("input", actualizar);
+    actualizar();
+})();
+</script>
 {% endblock %}

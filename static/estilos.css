@@ -683,6 +683,179 @@ h2 {
     color: #c9d1d9;
 }
 
+/* ── layout clases con sidebar ────────────────────────── */
+
+.clase-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+    align-items: start;
+}
+
+.clase-sidebar {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 1rem 0.9rem;
+    font-size: 0.85rem;
+}
+.clase-sidebar h4 {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8b949e;
+    margin: 0 0 0.6rem 0;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid #30363d;
+}
+.clase-sidebar ul { list-style: none; margin: 0; padding: 0; }
+.clase-sidebar li { margin: 0.1rem 0; }
+.clase-sidebar a {
+    display: block;
+    color: #8b949e;
+    text-decoration: none;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    line-height: 1.4;
+}
+.clase-sidebar a:hover { color: #e6edf3; background: rgba(255,255,255,0.04); }
+.clase-sidebar a.active {
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.1);
+    border-left-color: #58a6ff;
+    font-weight: 600;
+}
+.sidebar-h3 { padding-left: 1.1rem; font-size: 0.82rem; color: #6e7681; }
+.sidebar-h3 a { font-size: 0.82rem; }
+
+/* En clase-layout, el .clase-content no necesita su propio max-width/margin */
+.clase-layout .clase-content { margin: 0; max-width: none; }
+
+/* El container original del base queda vacio; lo ocultamos si está vacio */
+.clase-layout ~ .container:empty { display: none; }
+
+@media (max-width: 1024px) {
+    .clase-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .clase-sidebar {
+        position: static;
+        max-height: none;
+        order: -1;
+    }
+    /* TOC colapsable en mobile */
+    .toc-collapsible h2 { cursor: pointer; user-select: none; }
+    .toc-collapsible h2::after { content: " ▾"; color: #58a6ff; font-size: 0.8em; }
+    .toc-collapsible:not(.open) ul { display: none; }
+}
+
+/* ── focus-visible global ───────────────────────────── */
+
+a:focus-visible,
+button:focus-visible,
+textarea:focus-visible,
+input:focus-visible {
+    outline: 2px solid #58a6ff;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* ── botón volver arriba ─────────────────────────────── */
+
+#back-to-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #21262d;
+    color: #58a6ff;
+    border: 1px solid #30363d;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s, background 0.2s;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+#back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+#back-to-top:hover {
+    background: #30363d;
+    transform: translateY(-2px);
+}
+
+/* ── snippets con botón copiar ───────────────────────── */
+
+.snippet-wrapper {
+    position: relative;
+    margin: 1.25rem 0;
+}
+
+.clase-content .snippet-wrapper pre {
+    margin: 0;
+}
+
+.btn-copiar-snippet {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    z-index: 5;
+    font-family: inherit;
+}
+
+.snippet-wrapper:hover .btn-copiar-snippet,
+.btn-copiar-snippet:focus-visible {
+    opacity: 1;
+}
+
+.btn-copiar-snippet:hover {
+    background: #30363d;
+    color: #e6edf3;
+}
+
+.btn-copiar-snippet.copiado {
+    background: #04260e;
+    color: #3fb950;
+    border-color: #238636;
+    opacity: 1;
+}
+
+/* ── nav active link ──────────────────────────────────── */
+
+nav a[aria-current="page"] {
+    color: #e6edf3;
+    background: rgba(88, 166, 255, 0.12);
+}
+
+nav a[aria-current="page"]:hover {
+    background: rgba(88, 166, 255, 0.18);
+}
+
 /* ── hamburger ──────────────────────────────────────── */
 
 .hamburger {

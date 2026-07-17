@@ -22,19 +22,39 @@
         <a href="/tablas" class="btn-detalle">Ver esquema completo</a>
     </div>
     <div class="card-body">
-        <table>
-            <tr><th>Tabla</th><th>Filas</th><th>Descripcion</th></tr>
-            <tr><td>editoriales</td><td>33</td><td>Editoriales de libros</td></tr>
-            <tr><td>autores</td><td>72</td><td>Autores</td></tr>
-            <tr><td>traductores</td><td>74</td><td>Traductores</td></tr>
-            <tr><td>libros</td><td>78</td><td>Libros (con FK a editoriales)</td></tr>
-            <tr><td>autoria</td><td>78</td><td>Relacion autores-libros (N:M)</td></tr>
-            <tr><td>traduccion</td><td>87</td><td>Relacion traductores-libros (N:M)</td></tr>
-            <tr><td>puntuaciones</td><td>604.173</td><td>Puntuaciones de libros</td></tr>
-            <tr><td>lista_larga</td><td>78</td><td>Tabla desnormalizada</td></tr>
-            <tr><td>leones_marinos</td><td>6</td><td>Leones marinos</td></tr>
-            <tr><td>migraciones</td><td>8</td><td>Migraciones</td></tr>
+        <table id="tabla-estadisticas">
+            <thead>
+                <tr><th scope="col">Tabla</th><th scope="col">Filas</th><th scope="col">Descripcion</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>editoriales</td><td data-filas="editoriales">—</td><td>Editoriales de libros</td></tr>
+                <tr><td>autores</td><td data-filas="autores">—</td><td>Autores</td></tr>
+                <tr><td>traductores</td><td data-filas="traductores">—</td><td>Traductores</td></tr>
+                <tr><td>libros</td><td data-filas="libros">—</td><td>Libros (con FK a editoriales)</td></tr>
+                <tr><td>autoria</td><td data-filas="autoria">—</td><td>Relacion autores-libros (N:M)</td></tr>
+                <tr><td>traduccion</td><td data-filas="traduccion">—</td><td>Relacion traductores-libros (N:M)</td></tr>
+                <tr><td>puntuaciones</td><td data-filas="puntuaciones">—</td><td>Puntuaciones de libros</td></tr>
+                <tr><td>lista_larga</td><td data-filas="lista_larga">—</td><td>Tabla desnormalizada</td></tr>
+                <tr><td>leones_marinos</td><td data-filas="leones_marinos">—</td><td>Leones marinos</td></tr>
+                <tr><td>migraciones</td><td data-filas="migraciones">—</td><td>Migraciones</td></tr>
+            </tbody>
         </table>
     </div>
 </div>
+
+<script>
+(function () {
+    "use strict";
+    fetch("/api/estadisticas").then(function (r) { return r.json(); }).then(function (data) {
+        (data.tablas || []).forEach(function (t) {
+            var cell = document.querySelector('[data-filas="' + t.tabla + '"]');
+            if (cell) {
+                cell.textContent = t.filas == null ? "N/D" : Number(t.filas).toLocaleString("es-ES");
+            }
+        });
+    }).catch(function () {
+        // Mantener los "—" del fallback estático si falla el endpoint
+    });
+})();
+</script>
 {% endblock %}

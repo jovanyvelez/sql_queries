@@ -3,6 +3,66 @@
 {% block extra_css %}
 <style>
     .container { max-width: 1200px; }
+
+    /* CodeMirror theme overrides para tema oscuro */
+    .cm-editor { max-height: 240px; border: 2px solid #30363d; border-radius: 8px; }
+    .cm-editor.cm-focused { border-color: #58a6ff; }
+    .cm-scroller { font-family: "Consolas", "Monaco", "Courier New", monospace; font-size: 0.95rem; }
+    .cm-gutters { background: #0d1117; border-right: 1px solid #30363d; color: #8b949e; }
+
+    .consola-toolbar {
+        display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin-top: 0.75rem;
+    }
+    .consola-status {
+        font-size: 0.85rem; color: #8b949e; margin-left: auto;
+    }
+    .consola-status.ok { color: #3fb950; }
+    .consola-status.error { color: #f85149; }
+
+    .historial-select {
+        background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+        border-radius: 6px; padding: 0.45rem 0.7rem; font-size: 0.85rem; max-width: 380px;
+    }
+    .historial-select:focus-visible { outline: 2px solid #58a6ff; outline-offset: 1px; }
+
+    .tabla-resultados-wrapper {
+        overflow-x: auto; max-height: 540px; overflow-y: auto; margin-top: 1rem;
+        border: 1px solid #30363d; border-radius: 8px;
+    }
+    .tabla-resultados { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .tabla-resultados thead th {
+        background: #21262d; color: #e6edf3; padding: 0.55rem 0.85rem; text-align: left;
+        position: sticky; top: 0; z-index: 2; border-bottom: 1px solid #30363d;
+    }
+    .tabla-resultados tbody td {
+        padding: 0.45rem 0.85rem; border-bottom: 1px solid #21262d; color: #c9d1d9;
+        white-space: nowrap; max-width: 480px; overflow: hidden; text-overflow: ellipsis;
+    }
+    .tabla-resultados tbody tr:nth-child(odd) td { background: #0d1117; }
+    .tabla-resultados tbody tr:hover td { background: #161b22; }
+    .tabla-resultados tbody td.null-cell { color: #6e7681; font-style: italic; }
+
+    .consola-acciones { display: flex; gap: 0.75rem; margin-top: 0.75rem; flex-wrap: wrap; }
+    .btn-accion-secundaria {
+        background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+        border-radius: 6px; padding: 0.55rem 1rem; font-size: 0.88rem; cursor: pointer;
+        font-family: inherit;
+    }
+    .btn-accion-secundaria:hover { background: #30363d; }
+    .btn-accion-secundaria:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .spinner {
+        width: 14px; height: 14px; border: 2px solid #30363d; border-top-color: #58a6ff;
+        border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;
+        vertical-align: middle; margin-right: 0.4rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .resultados-meta {
+        display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    .resultados-meta h2 { margin: 0; font-size: 1.1rem; border: none; padding: 0; }
 </style>
 {% endblock %}
 {% block content %}
@@ -13,53 +73,67 @@
     <div class="card">
         <div class="card-header"><h3>Consulta</h3></div>
         <div class="card-body">
-            <form method="post" action="/consulta">
-                <textarea name="sql" placeholder="SELECT * FROM lista_larga LIMIT 5;">{{ sql_anterior or '' }}</textarea>
-                <div class="btn-row">
-                    <button type="submit">Ejecutar (Ctrl+Enter)</button>
-                    <button type="button" onclick="window.location='/consola'" class="btn-secondary">Limpiar</button>
+            <form id="form-consola" method="post" action="/consulta">
+                <div id="cm-host">
+                    <textarea name="sql" id="sql-textarea" placeholder="SELECT titulo, autor FROM lista_larga LIMIT 10;">{{ sql_anterior or '' }}</textarea>
+                </div>
+                <div class="consola-toolbar">
+                    <button type="submit" id="btn-ejecutar">Ejecutar (Ctrl+Enter)</button>
+                    <button type="button" id="btn-limpiar" class="btn-accion-secundaria">Limpiar</button>
+                    <button type="button" id="btn-csv" class="btn-accion-secundaria" disabled>Exportar CSV</button>
+                    <label for="historial-select" class="consola-status" style="margin-left: 0; color: #8b949e;">Historial:</label>
+                    <select id="historial-select" class="historial-select" title="Consultas recientes">
+                        <option value="">— Consultas recientes —</option>
+                    </select>
+                    <span id="consola-status" class="consola-status"></span>
                 </div>
             </form>
-            {% if ayuda %}
-                <p class="help">Hint: usa {{ ayuda }} para pasar parametros. Ej: <code>SELECT * FROM libros WHERE titulo = :titulo</code></p>
-            {% endif %}
-            {% if error %}
-                <div class="error-box">{{ error }}</div>
-            {% endif %}
-            {% if resultado is not none %}
-                <h2>Resultado ({{ resultado | length }} filas)</h2>
-                {% if resultado | length == 0 %}
-                    <p class="empty">La consulta no devolvio filas.</p>
-                {% elif resultado[0].get('mensaje') %}
-                    <div class="info-box">{{ resultado[0].mensaje }}</div>
-                {% else %}
-                    <table>
-                        <tr>
-                            {% for col in resultado[0].keys() %}
-                                <th>{{ col }}</th>
-                            {% endfor %}
-                        </tr>
-                        {% for fila in resultado %}
-                        <tr>
-                            {% for val in fila.values() %}
-                                <td>{{ val }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </table>
+
+            <div id="resultado-area">
+                {% if error %}
+                    <div class="error-box">{{ error }}</div>
                 {% endif %}
-            {% endif %}
+                {% if resultado is not none %}
+                    <div class="resultados-meta">
+                        <h2>Resultado ({{ resultado | length }} filas)</h2>
+                    </div>
+                    {% if resultado | length == 0 %}
+                        <p class="empty">La consulta no devolvio filas.</p>
+                    {% elif resultado[0].get('mensaje') %}
+                        <div class="info-box">{{ resultado[0].mensaje }}</div>
+                    {% else %}
+                        <div class="tabla-resultados-wrapper">
+                            <table class="tabla-resultados">
+                                <thead>
+                                    <tr>
+                                        {% for col in resultado[0].keys() %}<th>{{ col }}</th>{% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for fila in resultado %}
+                                    <tr>
+                                        {% for val in fila.values() %}
+                                        <td{% if val is none %} class="null-cell"{% endif %}>{{ val }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 {% block extra_js %}
-<script>
-    document.querySelector('textarea').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
-            e.preventDefault();
-            this.form.submit();
-        }
-    });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/dracula.min.css">
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/sql/sql.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/sql-hint.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/hint/show-hint.min.css">
+<script src="/static/consola.js"></script>
 {% endblock %}

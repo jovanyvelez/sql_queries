@@ -11,3 +11,4 @@ class Ejercicio:
     dificultad: str  # 'basico', 'intermedio', 'avanzado'
     sql: str
     params: dict[str, Any] = field(default_factory=dict)
+    orden_importa: bool = False

@@ -69,8 +69,44 @@ async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
             }
         )
 
+    # Claves foraneas para el diagrama ER (information_schema)
+    relaciones: list[dict[str, str]] = []
+    try:
+        fks = await db.execute(
+            text(
+                """
+                SELECT
+                    kcu.table_name AS tabla_origen,
+                    kcu.column_name AS columna_origen,
+                    ccu.table_name AS tabla_destino,
+                    ccu.column_name AS columna_destino
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                    AND tc.table_schema = kcu.table_schema
+                JOIN information_schema.constraint_column_usage ccu
+                    ON ccu.constraint_name = tc.constraint_name
+                    AND ccu.table_schema = tc.table_schema
+                WHERE tc.constraint_type = 'FOREIGN KEY'
+                    AND tc.table_schema = 'public'
+                ORDER BY kcu.table_name, kcu.column_name
+                """
+            )
+        )
+        for r in fks.fetchall():
+            relaciones.append(
+                {
+                    "origen_tabla": r.tabla_origen,
+                    "origen_col": r.columna_origen,
+                    "destino_tabla": r.tabla_destino,
+                    "destino_col": r.columna_destino,
+                }
+            )
+    except Exception:
+        pass
+
     return templates.TemplateResponse(
-        request, "tablas.html", {"tablas": tablas_dict}
+        request, "tablas.html", {"tablas": tablas_dict, "relaciones": relaciones}
     )
 
 
@@ -83,6 +119,27 @@ async def health(db: AsyncSession = Depends(get_db)):
         return JSONResponse(
             {"status": "error", "database": "disconnected"}, status_code=503
         )
+
+
+TABLAS_ESTADISTICAS = [
+    "editoriales", "autores", "traductores", "libros",
+    "autoria", "traduccion", "puntuaciones", "lista_larga",
+    "leones_marinos", "migraciones",
+]
+
+
+@app.get("/api/estadisticas")
+async def estadisticas(db: AsyncSession = Depends(get_db)):
+    """Devuelve el número de filas de cada tabla principal."""
+    resultados: list[dict[str, object]] = []
+    for tabla in TABLAS_ESTADISTICAS:
+        try:
+            res = await db.execute(text(f'SELECT COUNT(*) AS n FROM "{tabla}"'))
+            n = res.scalar()
+        except Exception:
+            n = None
+        resultados.append({"tabla": tabla, "filas": n})
+    return JSONResponse({"tablas": resultados})
 
 
 @app.exception_handler(500)

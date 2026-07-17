@@ -27,6 +27,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra las columnas titulo y autor de la tabla lista_larga. Ordena los resultados alfabeticamente por titulo.",
             dificultad="basico",
             sql="SELECT titulo, autor FROM lista_larga ORDER BY titulo",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_04",
@@ -51,6 +52,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Encuentra los 10 libros mejor valorados. Muestra el titulo y la puntuacion, ordenados de mayor a menor puntuacion.",
             dificultad="basico",
             sql="SELECT titulo, puntuacion FROM lista_larga ORDER BY puntuacion DESC LIMIT 10",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_07",
@@ -59,6 +61,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Encuentra los 10 libros con peor puntuacion. Muestra el titulo y la puntuacion, ordenados de menor a mayor.",
             dificultad="basico",
             sql="SELECT titulo, puntuacion FROM lista_larga ORDER BY puntuacion LIMIT 10",
+            orden_importa=True,
         ),
         # ── INTERMEDIOS (LIKE, BETWEEN, NULL, combinados) ──
         Ejercicio(
@@ -84,6 +87,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra el titulo, autor y anio de los libros publicados entre 2020 y 2022 (inclusive). Ordena por anio.",
             dificultad="intermedio",
             sql="SELECT titulo, autor, anio FROM lista_larga WHERE anio BETWEEN 2020 AND 2022 ORDER BY anio",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_11",
@@ -157,6 +161,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra el titulo y la puntuacion de los libros cuya puntuacion sea mayor que la puntuacion promedio de todos los libros. Ordena de mayor a menor puntuacion. (Pista: usa una subconsulta).",
             dificultad="avanzado",
             sql="SELECT titulo, puntuacion FROM lista_larga WHERE puntuacion > (SELECT AVG(puntuacion) FROM lista_larga) ORDER BY puntuacion DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_20",
@@ -165,6 +170,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra los 5 libros con mas votos. Incluye titulo, puntuacion y votos. Ordena por votos descendente.",
             dificultad="avanzado",
             sql="SELECT titulo, puntuacion, votos FROM lista_larga ORDER BY votos DESC LIMIT 5",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_21",
@@ -173,6 +179,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Para las editoriales que tienen al menos 2 libros, calcula la puntuacion promedio. Muestra la editorial y su promedio redondeado a 2 decimales. Ordena de mayor a menor promedio. (Pista: GROUP BY con HAVING).",
             dificultad="avanzado",
             sql="SELECT editorial, ROUND(AVG(puntuacion)::numeric, 2) AS promedio FROM lista_larga GROUP BY editorial HAVING COUNT(*) >= 2 ORDER BY promedio DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_22",
@@ -181,6 +188,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="¿Cuantos libros hay de cada formato? Agrupa por formato, cuenta los libros y ordena por cantidad descendente.",
             dificultad="avanzado",
             sql="SELECT formato, COUNT(*) AS cantidad FROM lista_larga GROUP BY formato ORDER BY cantidad DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_23",
@@ -189,6 +197,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Encuentra libros con mas de 10000 votos y puntuacion superior a 4.0. Muestra titulo, puntuacion y votos, ordenados por puntuacion descendente.",
             dificultad="avanzado",
             sql="SELECT titulo, puntuacion, votos FROM lista_larga WHERE votos > 10000 AND puntuacion > 4.0 ORDER BY puntuacion DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_24",
@@ -205,6 +214,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Calcula la puntuacion promedio por anio. Muestra anio y promedio redondeado a 2 decimales, ordenado del mejor promedio al peor. (Pista: GROUP BY anio).",
             dificultad="avanzado",
             sql="SELECT anio, ROUND(AVG(puntuacion)::numeric, 2) AS promedio FROM lista_larga GROUP BY anio ORDER BY promedio DESC",
+            orden_importa=True,
         ),
         # ── NUEVOS ejercicios aula ──
         Ejercicio(
@@ -238,6 +248,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra el titulo y anio de los libros publicados en 2018 o en 2023. Usa OR sin parentesis.",
             dificultad="basico",
             sql="SELECT titulo, anio FROM lista_larga WHERE anio = 2018 OR anio = 2023 ORDER BY anio",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_30",
@@ -246,6 +257,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Encuentra libros con mas de 200 paginas, menos de 500 paginas, y puntuacion mayor a 3.5. Muestra titulo, paginas y puntuacion.",
             dificultad="intermedio",
             sql="SELECT titulo, paginas, puntuacion FROM lista_larga WHERE paginas > 200 AND paginas < 500 AND puntuacion > 3.5 ORDER BY puntuacion DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_31",
@@ -254,6 +266,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra el titulo y anio de los libros publicados FUERA del periodo 2020-2022. Usa NOT BETWEEN.",
             dificultad="intermedio",
             sql="SELECT titulo, anio FROM lista_larga WHERE anio NOT BETWEEN 2020 AND 2022 ORDER BY anio",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_32",
@@ -262,6 +275,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Muestra titulo, anio y puntuacion de todos los libros. Ordena por anio descendente, y dentro del mismo anio por puntuacion ascendente.",
             dificultad="intermedio",
             sql="SELECT titulo, anio, puntuacion FROM lista_larga ORDER BY anio DESC, puntuacion ASC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_33",
@@ -278,6 +292,7 @@ def ejercicios_clase0() -> list[Ejercicio]:
             enunciado="Calcula la suma total de votos para los libros en formato 'paperback' y por separado para los 'hardcover'. Muestra el formato y su suma de votos. Usa GROUP BY.",
             dificultad="avanzado",
             sql="SELECT formato, SUM(votos) AS total_votos FROM lista_larga WHERE formato IN ('paperback', 'hardcover') GROUP BY formato ORDER BY total_votos DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c0_35",

@@ -27,6 +27,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra cada autor junto con los titulos de los libros que ha escrito. Necesitas unir tres tablas: autores, autoria y libros.",
             dificultad="basico",
             sql="SELECT a.nombre, l.titulo FROM autores a JOIN autoria au ON a.id = au.autor_id JOIN libros l ON l.id = au.libro_id ORDER BY a.nombre",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_04",
@@ -100,6 +101,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Calcula la puntuacion promedio de cada libro. Muestra el libro_id y el promedio redondeado a 2 decimales. Ordena de mayor a menor promedio. Usa GROUP BY.",
             dificultad="intermedio",
             sql="SELECT libro_id, ROUND(AVG(puntuacion)::numeric, 2) AS promedio FROM puntuaciones GROUP BY libro_id ORDER BY promedio DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_13",
@@ -108,6 +110,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="¿Cuantas puntuaciones ha recibido cada libro? Muestra el libro_id y el conteo. Ordena por cantidad descendente.",
             dificultad="intermedio",
             sql="SELECT libro_id, COUNT(*) AS total FROM puntuaciones GROUP BY libro_id ORDER BY total DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_14",
@@ -116,6 +119,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra los libros que tienen mas de 1000 puntuaciones. Incluye libro_id y el total. Usa GROUP BY con HAVING.",
             dificultad="intermedio",
             sql="SELECT libro_id, COUNT(*) AS total FROM puntuaciones GROUP BY libro_id HAVING COUNT(*) > 1000 ORDER BY total DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_15",
@@ -149,6 +153,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra el titulo y la puntuacion promedio de los libros que tienen al menos 100 puntuaciones. Une puntuaciones con libros, agrupa, filtra con HAVING y ordena por promedio descendente. Redondea a 2 decimales.",
             dificultad="avanzado",
             sql="SELECT l.titulo, ROUND(AVG(p.puntuacion)::numeric, 2) AS promedio FROM libros l JOIN puntuaciones p ON l.id = p.libro_id GROUP BY l.id, l.titulo HAVING COUNT(*) >= 100 ORDER BY promedio DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_19",
@@ -157,6 +162,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Crea una consulta que muestre cada persona con su profesion ('autor' o 'traductor'). Personas que son ambas deben aparecer en ambas listas. Usa UNION con SELECT de constante.",
             dificultad="avanzado",
             sql="SELECT 'autor' AS profesion, nombre FROM autores UNION SELECT 'traductor' AS profesion, nombre FROM traductores ORDER BY nombre",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_20",
@@ -165,6 +171,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Para cada libro, muestra su titulo, el nombre de su autor, y su puntuacion promedio redondeada a 2 decimales. Ordena por puntuacion descendente. Necesitas unir 4 tablas: libros, autoria, autores y puntuaciones.",
             dificultad="avanzado",
             sql="SELECT l.titulo, a.nombre AS autor, ROUND(AVG(p.puntuacion)::numeric, 2) AS promedio FROM libros l JOIN autoria au ON l.id = au.libro_id JOIN autores a ON a.id = au.autor_id LEFT JOIN puntuaciones p ON l.id = p.libro_id GROUP BY l.id, l.titulo, a.nombre ORDER BY promedio DESC NULLS LAST",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_21",
@@ -181,6 +188,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Encuentra los libros cuyas editoriales tienen una puntuacion promedio mayor a 3.8. Muestra el titulo del libro y la editorial. (Pista: filtra editoriales con subconsulta en HAVING).",
             dificultad="avanzado",
             sql="SELECT l.titulo, e.editorial FROM libros l JOIN editoriales e ON l.editorial_id = e.id WHERE e.id IN (SELECT e2.id FROM editoriales e2 JOIN libros l2 ON e2.id = l2.editorial_id JOIN puntuaciones p ON l2.id = p.libro_id GROUP BY e2.id HAVING AVG(p.puntuacion) > 3.8) ORDER BY e.editorial, l.titulo",
+            orden_importa=True,
         ),
         # ── NUEVOS ejercicios aula ──
         Ejercicio(
@@ -198,6 +206,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra cada libro con el nombre de su traductor. Une las tablas libros, traduccion y traductores. Ordena por titulo.",
             dificultad="basico",
             sql="SELECT l.titulo, t.nombre AS traductor FROM libros l JOIN traduccion tr ON l.id = tr.libro_id JOIN traductores t ON t.id = tr.traductor_id ORDER BY l.titulo",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_25",
@@ -214,6 +223,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Encuentra los libros que NO tienen ninguna puntuacion registrada. Usa LEFT JOIN con puntuaciones y filtra por IS NULL.",
             dificultad="intermedio",
             sql="SELECT l.titulo FROM libros l LEFT JOIN puntuaciones p ON l.id = p.libro_id WHERE p.libro_id IS NULL ORDER BY l.titulo",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_27",
@@ -222,6 +232,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra cada autor junto con el numero de libros que ha escrito. Usa GROUP BY sobre la tabla autoria. Ordena del mas prolifico al menos.",
             dificultad="intermedio",
             sql="SELECT a.nombre, COUNT(au.libro_id) AS libros_escritos FROM autores a JOIN autoria au ON a.id = au.autor_id GROUP BY a.id, a.nombre ORDER BY libros_escritos DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_28",
@@ -230,6 +241,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Calcula la puntuacion promedio de los libros agrupados por editorial. Muestra el nombre de la editorial y el promedio redondeado a 2 decimales. Ordena de mayor a menor promedio. Necesitas unir editoriales, libros y puntuaciones.",
             dificultad="intermedio",
             sql="SELECT e.editorial, ROUND(AVG(p.puntuacion)::numeric, 2) AS promedio FROM editoriales e JOIN libros l ON e.id = l.editorial_id JOIN puntuaciones p ON l.id = p.libro_id GROUP BY e.id, e.editorial ORDER BY promedio DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_29",
@@ -238,6 +250,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="¿Hay autores en la base de datos que no tienen ningun libro asociado? Usa NOT IN con una subconsulta que obtenga los autor_id de la tabla autoria.",
             dificultad="avanzado",
             sql="SELECT nombre FROM autores WHERE id NOT IN (SELECT DISTINCT autor_id FROM autoria) ORDER BY nombre",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_30",
@@ -246,6 +259,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra los autores que han escrito mas de un libro. Incluye el nombre y la cantidad. Filtra con HAVING COUNT > 1.",
             dificultad="avanzado",
             sql="SELECT a.nombre, COUNT(au.libro_id) AS libros_escritos FROM autores a JOIN autoria au ON a.id = au.autor_id GROUP BY a.id, a.nombre HAVING COUNT(au.libro_id) > 1 ORDER BY libros_escritos DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_31",
@@ -254,6 +268,7 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Para cada leon marino, calcula la distancia total recorrida sumando todas sus migraciones. Muestra el nombre, la especie y la distancia total. Ordena del mas viajero al menos.",
             dificultad="avanzado",
             sql="SELECT lm.nombre, lm.especie, SUM(m.distancia) AS distancia_total, SUM(m.dias) AS dias_totales FROM leones_marinos lm JOIN migraciones m ON lm.id = m.id GROUP BY lm.id, lm.nombre, lm.especie ORDER BY distancia_total DESC",
+            orden_importa=True,
         ),
         Ejercicio(
             id="c1_32",
@@ -262,5 +277,6 @@ def ejercicios_clase1() -> list[Ejercicio]:
             enunciado="Muestra el titulo de cada libro junto con el nombre de su autor y su traductor. Necesitas unir 5 tablas: libros, autoria, autores, traduccion y traductores. Limita a 15 resultados.",
             dificultad="avanzado",
             sql="SELECT l.titulo, a.nombre AS autor, t.nombre AS traductor FROM libros l JOIN autoria au ON l.id = au.libro_id JOIN autores a ON a.id = au.autor_id JOIN traduccion tr ON l.id = tr.libro_id JOIN traductores t ON t.id = tr.traductor_id ORDER BY l.titulo LIMIT 15",
+            orden_importa=True,
         ),
     ]
