@@ -16,8 +16,8 @@
             </button>
             <div class="nav-links" id="nav-links-main">
                 <a href="/tablas"{% if request.url.path == '/tablas' %} aria-current="page"{% endif %}>Tablas</a>
-                <a href="/clases/clase0"{% if request.url.path == '/clases/clase0' %} aria-current="page"{% endif %}>Aprende Queries SQL</a>
-                <a href="/clases/clase1"{% if request.url.path == '/clases/clase1' %} aria-current="page"{% endif %}>Aprende Relaciones de tablas SQL</a>
+                <a href="/clases/consultas"{% if request.url.path.startswith('/clases/consultas') %} aria-current="page"{% endif %}>Aprende Queries SQL</a>
+                <a href="/clases/relaciones"{% if request.url.path.startswith('/clases/relaciones') %} aria-current="page"{% endif %}>Aprende Relaciones de tablas SQL</a>
                 <a href="/ejercicios/clase0"{% if request.url.path.startswith('/ejercicios/clase0') %} aria-current="page"{% endif %}>Practica Queries</a>
                 <a href="/ejercicios/clase1"{% if request.url.path.startswith('/ejercicios/clase1') %} aria-current="page"{% endif %}>Practica Relaciones</a>
                 <a href="/consola" style="color: #58a6ff"{% if request.url.path == '/consola' %} aria-current="page"{% endif %}>Consola</a>

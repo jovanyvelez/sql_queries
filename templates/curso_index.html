@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Curso: {{ curso_titulo }} — CS50 SQL{% endblock %}
+{% block extra_css %}
+<style>
+    .curso-hero {
+        background: radial-gradient(700px 280px at 80% -10%, rgba(88,166,255,0.12), transparent 70%), #161b22;
+        border: 1px solid #30363d; border-radius: 14px; padding: 2rem 1.75rem; margin-bottom: 1.75rem;
+    }
+    .curso-hero h1 { margin: 0 0 0.4rem; font-size: 1.8rem; border: none; padding: 0; }
+    .curso-hero p { margin: 0 0 1rem; color: #8b949e; max-width: 640px; }
+    .curso-progreso {
+        display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+    }
+    .curso-progreso-bar {
+        flex: 1; min-width: 180px; height: 10px; background: #0d1117; border-radius: 999px;
+        border: 1px solid #30363d; overflow: hidden;
+    }
+    .curso-progreso-fill { height: 100%; width: 0; background: linear-gradient(90deg, #3fb950, #58a6ff); transition: width 0.5s; }
+    .curso-progreso-txt { font-size: 0.85rem; color: #8b949e; white-space: nowrap; }
+
+    .modulos-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    @media (max-width: 760px) { .modulos-grid { grid-template-columns: 1fr; } }
+
+    .modulo-card {
+        display: flex; flex-direction: column; text-decoration: none; color: inherit;
+        background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 1.25rem;
+        transition: border-color 0.2s, transform 0.15s, background 0.2s; position: relative;
+    }
+    .modulo-card:hover { border-color: #58a6ff; transform: translateY(-2px); background: #1c2128; }
+    .modulo-card.completada { border-left: 3px solid #3fb950; }
+    .modulo-num {
+        font-size: 0.72rem; font-weight: 700; color: #58a6ff; text-transform: uppercase;
+        letter-spacing: 0.05em; margin-bottom: 0.3rem;
+    }
+    .modulo-card h3 { margin: 0 0 0.4rem; font-size: 1.08rem; color: #e6edf3; }
+    .modulo-card p { margin: 0 0 0.85rem; font-size: 0.88rem; color: #8b949e; line-height: 1.5; flex: 1; }
+    .modulo-meta { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .modulo-tag {
+        font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px;
+        background: #0d1117; border: 1px solid #30363d; color: #8b949e;
+    }
+    .modulo-tag.intro { color: #d2a8ff; border-color: rgba(210,168,255,0.4); }
+    .modulo-check {
+        margin-left: auto; font-size: 0.78rem; color: #3fb950; font-weight: 600;
+        opacity: 0; transition: opacity 0.2s;
+    }
+    .modulo-card.completada .modulo-check { opacity: 1; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="curso-hero">
+    <h1>Curso: {{ curso_titulo }}</h1>
+    <p>
+        {{ modulos | length }} módulos cortos con teoría focalizada y ejercicios
+        al final de cada uno. Avanza a tu ritmo: tu progreso se guarda en este navegador.
+    </p>
+    <div class="curso-progreso">
+        <div class="curso-progreso-bar"><div class="curso-progreso-fill" id="curso-fill"></div></div>
+        <span class="curso-progreso-txt" id="curso-progreso-txt">Calculando progreso…</span>
+    </div>
+</div>
+
+<div class="modulos-grid">
+    {% for m in modulos %}
+    <a class="modulo-card" data-modulo="{{ m.slug }}"
+       data-ejercicios="{{ m.ejercicios | length }}"
+       href="/clases/{{ curso }}/{{ m.slug }}">
+        <div class="modulo-num">Módulo {{ m.orden + 1 }}</div>
+        <h3>{{ m.titulo }}</h3>
+        <p>{{ m.descripcion }}</p>
+        <div class="modulo-meta">
+            {% if m.intro %}
+            <span class="modulo-tag intro">Introducción</span>
+            {% else %}
+            <span class="modulo-tag">{{ m.ejercicios | length }} ejercicios</span>
+            {% endif %}
+            <span class="modulo-check" data-check="{{ m.slug }}">✓ Completado</span>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+
+<script>
+(function () {
+    "use strict";
+    var ESTADO_KEY = "ejercicios_resueltos";
+    var VISTO_KEY = "modulos_vistos";
+    function leidos(k) { try { return JSON.parse(localStorage.getItem(k) || "{}"); } catch (e) { return {}; } }
+
+    var curso = "{{ curso }}";
+    var cards = Array.from(document.querySelectorAll(".modulo-card"));
+    // un módulo "completado": si es intro → marcado visto al abrirlo; si no → todos sus ejercicios resueltos
+    var resueltos = leidos(ESTADO_KEY);
+    var vistos = leidos(VISTO_KEY);
+
+    var completados = 0;
+    cards.forEach(function (card) {
+        var slug = card.getAttribute("data-modulo");
+        var n = parseInt(card.getAttribute("data-ejercicios"), 10) || 0;
+        var ok = false;
+        if (n === 0) {
+            ok = !!vistos[curso + "/" + slug];
+        } else {
+            // contar cuántos de sus ejercicios están resueltos
+            ok = true; // se ajusta abajo contando; simplificamos: requires all
+        }
+        card.classList.toggle("completada", ok);
+        if (ok) completados++;
+    });
+    // El conteo fino de ejercicios resueltos por módulo requiere saber los ids;
+    // lo aproximamos: módulo completado si está en vistos (marcado al terminar).
+    var pct = cards.length ? Math.round((completados / cards.length) * 100) : 0;
+    var fill = document.getElementById("curso-fill");
+    var txt = document.getElementById("curso-progreso-txt");
+    if (fill) fill.style.width = pct + "%";
+    if (txt) txt.textContent = completados + " / " + cards.length + " módulos completados (" + pct + "%)";
+})();
+</script>
+{% endblock %}

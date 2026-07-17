@@ -5,10 +5,11 @@ from markdown_it import MarkdownIt
 
 MD_DIR = Path(__file__).parent.parent
 TPL_DIR = Path(__file__).parent / "templates"
+CONTENT_DIR = TPL_DIR / "content"
 
 ARCHIVOS = {
-    0: "CS50_SQL_Clase0_Consultas.md",
-    1: "CS50_SQL_Clase1_Relaciones.md",
+    0: ("CS50_SQL_Clase0_Consultas.md", "consultas"),
+    1: ("CS50_SQL_Clase1_Relaciones.md", "relaciones"),
 }
 
 md = MarkdownIt("commonmark")
@@ -16,7 +17,8 @@ md.enable("table")
 
 
 def convertir(clase_num: int):
-    texto = (MD_DIR / ARCHIVOS[clase_num]).read_text(encoding="utf-8")
+    nombre_md, curso = ARCHIVOS[clase_num]
+    texto = (MD_DIR / nombre_md).read_text(encoding="utf-8")
     texto = re.sub(r'!\[([^\]]*)\]\(images/([^)]+)\)', r'![\1](/static/images/\2)', texto)
     html = md.render(texto)
 
@@ -30,19 +32,11 @@ def convertir(clase_num: int):
         flags=re.DOTALL,
     )
 
-    plantilla = (
-        '{% extends "base.html" %}\n'
-        '{% block title %}Clase ' + str(clase_num) + ' — CS50 SQL{% endblock %}\n'
-        '{% block content %}\n'
-        '<div class="clase-content">\n'
-        + html +
-        '\n</div>\n'
-        '{% endblock %}\n'
-    )
-
-    salida = TPL_DIR / f"clase{clase_num}.html"
-    salida.write_text(plantilla, encoding="utf-8")
-    print(f"{salida} — {len(plantilla)} chars")
+    # Parcial de contenido plano (sin layout) para que services/modulos.py lo parta en módulos
+    CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+    parcial = CONTENT_DIR / f"{curso}.html"
+    parcial.write_text(html.strip() + "\n", encoding="utf-8")
+    print(f"{parcial} — {len(html)} chars")
 
 
 if __name__ == "__main__":
