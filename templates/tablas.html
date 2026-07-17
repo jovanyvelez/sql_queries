@@ -4,7 +4,7 @@
 <style>
     .tablas-toolbar {
         display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
     .tablas-toolbar input[type="search"] {
         flex: 1; min-width: 220px; max-width: 480px;
@@ -18,28 +18,126 @@
     .tablas-count { color: #8b949e; font-size: 0.85rem; }
     .tabla-card.hidden { display: none; }
 
+    /* controles globales */
+    .tablas-controles { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .btn-toggle {
+        background: #21262d; color: #e6edf3; border: 1px solid #30363d;
+        border-radius: 6px; padding: 0.4rem 0.85rem; font-size: 0.82rem;
+        cursor: pointer; font-family: inherit;
+    }
+    .btn-toggle:hover { background: #30363d; }
+
+    /* chips de salto rápido */
+    .chips-nav {
+        display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+    }
+    .chip {
+        background: #161b22; color: #79c0ff; border: 1px solid #30363d;
+        border-radius: 999px; padding: 0.3rem 0.8rem; font-size: 0.8rem;
+        text-decoration: none; font-family: monospace; cursor: pointer;
+        transition: all 0.15s; display: inline-block;
+    }
+    .chip:hover { background: rgba(88,166,255,0.1); border-color: #58a6ff; color: #e6edf3; }
+    .chip.hidden { display: none; }
+
+    /* ER diagram colapsable */
     .er-diagram {
-        background: #161b22; padding: 1.25rem; border-radius: 10px;
-        border: 1px solid #30363d; margin-bottom: 2rem; overflow-x: auto;
+        background: #161b22; border: 1px solid #30363d; border-radius: 10px;
+        margin-bottom: 1.5rem; overflow: hidden;
     }
-    .er-diagram h3 {
-        margin: 0 0 0.75rem 0; font-size: 1rem; color: #e6edf3;
+    .er-diagram summary {
+        cursor: pointer; padding: 0.9rem 1.25rem; font-size: 1rem; color: #e6edf3;
+        font-weight: 600; list-style: none; user-select: none;
+        display: flex; align-items: center; justify-content: space-between;
     }
+    .er-diagram summary::-webkit-details-marker { display: none; }
+    .er-diagram summary::after { content: "▾"; color: #58a6ff; transition: transform 0.2s; }
+    .er-diagram[open] summary::after { transform: rotate(180deg); }
+    .er-diagram-body { padding: 0 1.25rem 1.25rem; overflow-x: auto; }
     .er-diagram .mermaid { background: transparent; }
+
+    /* card de tabla colapsable */
+    .tabla-card { margin-bottom: 0.75rem; overflow: hidden; }
+    .tabla-card .card-header {
+        cursor: pointer; user-select: none; display: flex; align-items: center;
+        justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;
+        transition: background 0.15s;
+    }
+    .tabla-card .card-header:hover { background: #2d333b; }
+    .tabla-card .card-header h3 {
+        margin: 0; font-family: monospace; color: #79c0ff; font-size: 1.05rem;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .tabla-card .card-header h3 .chevron {
+        color: #58a6ff; transition: transform 0.2s; font-size: 0.8em;
+    }
+    .tabla-card.expandida .card-header h3 .chevron { transform: rotate(90deg); }
+    .tabla-meta { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .meta-pill {
+        font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px;
+        background: #0d1117; border: 1px solid #30363d; color: #8b949e;
+    }
+    .meta-pill.rows { color: #3fb950; }
+    .tabla-card .card-body { display: none; padding-top: 0; }
+    .tabla-card.expandida .card-body { display: block; }
+
+    .tabla-card table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    .tabla-card th {
+        background: #21262d; color: #e6edf3; padding: 0.55rem 0.85rem; text-align: left;
+        text-align: left;
+    }
+    .tabla-card td {
+        padding: 0.5rem 0.85rem; border-bottom: 1px solid #21262d; color: #c9d1d9;
+    }
+    .tabla-card td.col-name { font-family: monospace; color: #e6edf3; cursor: pointer; position: relative; }
+    .tabla-card td.col-name:hover { color: #58a6ff; }
+    .tabla-card td.col-name .copy-hint {
+        font-size: 0.68rem; color: #6e7681; margin-left: 0.4rem; opacity: 0;
+        transition: opacity 0.15s;
+    }
+    .tabla-card td.col-name:hover .copy-hint { opacity: 1; }
+    .tabla-card td.col-name.copiado .copy-hint { opacity: 1; color: #3fb950; }
+    .tabla-card td.col-type code {
+        background: #0d1117; padding: 0.12rem 0.4rem; border-radius: 4px;
+        font-size: 0.8rem; border: 1px solid #30363d; color: #d2a8ff;
+    }
+    .tabla-card tr.hidden-row { display: none; }
+    .tabla-card mark {
+        background: rgba(187, 128, 9, 0.35); color: #e6edf3; border-radius: 3px;
+        padding: 0 1px;
+    }
+
+    .badge-clave {
+        display: inline-block; font-size: 0.66rem; font-weight: 700;
+        padding: 0.1rem 0.4rem; border-radius: 4px; margin-left: 0.4rem;
+        vertical-align: middle; font-family: inherit;
+    }
+    .badge-pk { background: rgba(210, 168, 255, 0.15); color: #d2a8ff; border: 1px solid rgba(210, 168, 255, 0.4); }
+    .badge-fk { background: rgba(255, 166, 87, 0.12); color: #ffa657; border: 1px solid rgba(255, 166, 87, 0.4); }
+    .fk-ref { font-size: 0.75rem; color: #8b949e; font-family: monospace; }
+    .fk-ref::before { content: "→ "; color: #ffa657; }
+
+    .leyenda {
+        display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+        font-size: 0.78rem; color: #8b949e;
+    }
+    .leyenda span { display: inline-flex; align-items: center; gap: 0.3rem; }
 </style>
 {% endblock %}
 {% block content %}
 <h1>Esquema de la base de datos <code>sql_teach</code></h1>
 
 <p class="intro">
-    Estructura de cada tabla: columnas, tipos de dato, si admiten
-    <code>NULL</code> y sus valores por defecto.
+    Estructura de cada tabla: columnas, tipos de dato, claves (PK/FK),
+    si admiten <code>NULL</code> y sus valores por defecto. Los conteos
+    se leen en vivo desde PostgreSQL.
 </p>
 
 {% if relaciones %}
-<div class="er-diagram">
-    <h3>Diagrama Entidad-Relación</h3>
-    <div class="mermaid">
+<details class="er-diagram" open>
+    <summary>Diagrama Entidad-Relación</summary>
+    <div class="er-diagram-body">
+        <div class="mermaid">
 erDiagram
 {% for nombre, columnas in tablas.items() %}{{ nombre }} {
 {% for col in columnas %}    {{ col.tipo }} {{ col.columna }}
@@ -47,35 +145,67 @@ erDiagram
 }
 {% endfor %}{% for r in relaciones %}{{ r.origen_tabla }} }o--|| {{ r.destino_tabla }} : "{{ r.origen_col }}→{{ r.destino_col }}"
 {% endfor %}
+        </div>
     </div>
-</div>
+</details>
 {% endif %}
+
+<div class="leyenda">
+    <span><span class="badge-clave badge-pk">PK</span> Clave primaria</span>
+    <span><span class="badge-clave badge-fk">FK</span> Clave foránea</span>
+    <span>Click en el nombre de una columna para copiarla</span>
+</div>
 
 <div class="tablas-toolbar">
     <input type="search" id="buscador-tablas" placeholder="Filtra por tabla o columna…" aria-label="Buscar tabla o columna" autocomplete="off">
     <span id="tablas-count" class="tablas-count"></span>
 </div>
 
+<div class="chips-nav" id="chips-nav">
+    {% for nombre, columnas in tablas.items() %}
+    <a class="chip" data-chip="{{ nombre|lower }}" href="#tabla-{{ nombre }}">{{ nombre }}</a>
+    {% endfor %}
+</div>
+
+<div class="tablas-controles">
+    <button type="button" class="btn-toggle" id="btn-expandir-todo">Expandir todo</button>
+    <button type="button" class="btn-toggle" id="btn-contraer-todo">Contraer todo</button>
+</div>
+
 {% for nombre, columnas in tablas.items() %}
-<div class="card tabla-card" data-tabla="{{ nombre|lower }}" style="margin-bottom: 1.5rem;">
-    <div class="card-header"><h3>{{ nombre }}</h3></div>
+<div class="card tabla-card" id="tabla-{{ nombre }}" data-tabla="{{ nombre|lower }}">
+    <div class="card-header" role="button" tabindex="0" aria-expanded="false" data-toggle>
+        <h3><span class="chevron">▸</span>{{ nombre }}</h3>
+        <div class="tabla-meta">
+            <span class="meta-pill rows">{{ "{:,}".format(conteos.get(nombre, -1)).replace(",", ".") if conteos.get(nombre, -1) >= 0 else "—" }} filas</span>
+            <span class="meta-pill">{{ columnas | length }} columnas</span>
+        </div>
+    </div>
     <div class="card-body">
         <table>
             <thead>
                 <tr>
                     <th scope="col">Columna</th>
                     <th scope="col">Tipo</th>
-                    <th scope="col">¿Acepta NULL?</th>
-                    <th scope="col">Valor por defecto</th>
+                    <th scope="col">¿NULL?</th>
+                    <th scope="col">Por defecto</th>
                 </tr>
             </thead>
             <tbody>
                 {% for col in columnas %}
                 <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
-                    <td scope="row"><strong>{{ col.columna }}</strong></td>
-                    <td><code>{{ col.tipo }}</code></td>
+                    <td class="col-name" data-copy="{{ nombre }}.{{ col.columna }}" scope="row">
+                        <span class="col-label">{{ col.columna }}</span>
+                        {% if col.es_pk %}<span class="badge-clave badge-pk" title="Clave primaria">PK</span>{% endif %}
+                        {% if col.fk_ref %}<span class="badge-clave badge-fk" title="Clave foránea → {{ col.fk_ref }}">FK</span>{% endif %}
+                        <span class="copy-hint">copiar</span>
+                    </td>
+                    <td class="col-type"><code>{{ col.tipo }}</code></td>
                     <td>{{ col.nulo }}</td>
-                    <td>{{ col.defecto }}</td>
+                    <td>
+                        {{ col.defecto }}
+                        {% if col.fk_ref %}<div class="fk-ref">{{ col.fk_ref }}</div>{% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -90,27 +220,112 @@ erDiagram
     var input = document.getElementById("buscador-tablas");
     var count = document.getElementById("tablas-count");
     var cards = Array.from(document.querySelectorAll(".tabla-card"));
+    var chips = Array.from(document.querySelectorAll(".chip"));
+
+    // --- Expandir/contraer ---
+    function toggleCard(card, expand) {
+        var isOpen = expand === undefined ? !card.classList.contains("expandida") : expand;
+        card.classList.toggle("expandida", isOpen);
+        var hdr = card.querySelector('[data-toggle]');
+        if (hdr) hdr.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    }
+    cards.forEach(function (card) {
+        var hdr = card.querySelector('[data-toggle]');
+        if (!hdr) return;
+        hdr.addEventListener("click", function () { toggleCard(card); });
+        hdr.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleCard(card); }
+        });
+    });
+    document.getElementById("btn-expandir-todo").addEventListener("click", function () {
+        cards.forEach(function (c) { toggleCard(c, true); });
+    });
+    document.getElementById("btn-contraer-todo").addEventListener("click", function () {
+        cards.forEach(function (c) { toggleCard(c, false); });
+    });
+
+    // --- Chips: saltar a la tabla y expandir ---
+    chips.forEach(function (chip) {
+        chip.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = chip.getAttribute("href");
+            var card = document.querySelector(id);
+            if (card) {
+                toggleCard(card, true);
+                card.scrollIntoView({ behavior: "smooth", block: "start" });
+                history.replaceState(null, "", id);
+            }
+        });
+    });
+
+    // --- Buscador con resaltado ---
+    function escapeRe(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+    function highlight(el, text, q) {
+        if (!q) { el.textContent = text; return; }
+        var re = new RegExp("(" + escapeRe(q) + ")", "ig");
+        el.innerHTML = text.replace(re, "<mark>$1</mark>");
+    }
+
     function actualizar() {
         var q = input.value.trim().toLowerCase();
         var visibles = 0;
         cards.forEach(function (card) {
             var tabla = card.getAttribute("data-tabla");
+            var colLabels = card.querySelectorAll(".col-label");
             var filas = Array.from(card.querySelectorAll("tbody tr"));
             var algunaFilaVisible = false;
-            filas.forEach(function (f) {
-                var col = f.getAttribute("data-col");
-                var match = !q || col.indexOf(q) !== -1 || tabla.indexOf(q) !== -1;
-                f.style.display = match ? "" : "none";
+            filas.forEach(function (f, i) {
+                var colAttr = f.getAttribute("data-col");
+                var match = !q || colAttr.indexOf(q) !== -1 || tabla.indexOf(q) !== -1;
+                f.classList.toggle("hidden-row", !match);
                 if (match) algunaFilaVisible = true;
+                // resaltar nombre de columna
+                highlight(colLabels[i], colLabels[i].textContent, q);
             });
             var cardMatch = !q || tabla.indexOf(q) !== -1 || algunaFilaVisible;
             card.classList.toggle("hidden", !cardMatch);
-            if (cardMatch) visibles++;
+            if (cardMatch) {
+                visibles++;
+                if (q && algunaFilaVisible) toggleCard(card, true); // auto-expandir al buscar
+            }
+            // resaltar nombre de tabla en el header
+            var hdrTitle = card.querySelector(".card-header h3");
+            // preservar el chevron
+            var chev = hdrTitle.querySelector(".chevron");
+            hdrTitle.innerHTML = "";
+            var span = document.createElement("span");
+            span.className = "chevron"; span.textContent = "▸";
+            hdrTitle.appendChild(span);
+            var label = document.createElement("span");
+            hdrTitle.appendChild(label);
+            highlight(label, tabla, q);
+        });
+        // filtrar chips
+        chips.forEach(function (chip) {
+            var t = chip.getAttribute("data-chip");
+            chip.classList.toggle("hidden", !(!q || t.indexOf(q) !== -1));
         });
         if (count) count.textContent = visibles + " / " + cards.length + " tablas";
     }
     input.addEventListener("input", actualizar);
     actualizar();
+
+    // --- Copiar nombre de columna ---
+    document.querySelectorAll(".col-name").forEach(function (td) {
+        td.addEventListener("click", function () {
+            var val = td.getAttribute("data-copy");
+            if (!val || !navigator.clipboard) return;
+            navigator.clipboard.writeText(val).then(function () {
+                var hint = td.querySelector(".copy-hint");
+                td.classList.add("copiado");
+                if (hint) hint.textContent = "¡copiado!";
+                setTimeout(function () {
+                    td.classList.remove("copiado");
+                    if (hint) hint.textContent = "copiar";
+                }, 1200);
+            });
+        });
+    });
 })();
 </script>
 {% endblock %}

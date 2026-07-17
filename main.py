@@ -55,7 +55,7 @@ async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
     )
     columnas = filas.fetchall()
 
-    tablas_dict: dict[str, list[dict[str, str]]] = {}
+    tablas_dict: dict[str, list[dict[str, object]]] = {}
     for col in columnas:
         tn = col.table_name
         if tn not in tablas_dict:
@@ -66,11 +66,15 @@ async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
                 "tipo": col.data_type,
                 "nulo": "SI" if col.is_nullable == "YES" else "NO",
                 "defecto": str(col.column_default) if col.column_default else "—",
+                "es_pk": False,
+                "fk_ref": None,
             }
         )
 
-    # Claves foraneas para el diagrama ER (information_schema)
+    # Claves foraneas para el diagrama ER + marca por columna
     relaciones: list[dict[str, str]] = []
+    fk_por_columna: dict[tuple[str, str], str] = {}
+    pk_por_columna: set[tuple[str, str]] = set()
     try:
         fks = await db.execute(
             text(
@@ -102,11 +106,50 @@ async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
                     "destino_col": r.columna_destino,
                 }
             )
+            fk_por_columna[(r.tabla_origen, r.columna_origen)] = (
+                f"{r.tabla_destino}.{r.columna_destino}"
+            )
+
+        pks = await db.execute(
+            text(
+                """
+                SELECT kcu.table_name, kcu.column_name
+                FROM information_schema.table_constraints tc
+                JOIN information_schema.key_column_usage kcu
+                    ON tc.constraint_name = kcu.constraint_name
+                    AND tc.table_schema = kcu.table_schema
+                WHERE tc.constraint_type = 'PRIMARY KEY'
+                    AND tc.table_schema = 'public'
+                """
+            )
+        )
+        for r in pks.fetchall():
+            pk_por_columna.add((r.table_name, r.column_name))
     except Exception:
         pass
 
+    # Marcar PK y FK en cada columna
+    for tn, cols in tablas_dict.items():
+        for c in cols:
+            if (tn, str(c["columna"])) in pk_por_columna:
+                c["es_pk"] = True
+            ref = fk_por_columna.get((tn, str(c["columna"])))
+            if ref:
+                c["fk_ref"] = ref
+
+    # Conteo de filas por tabla
+    conteos: dict[str, int] = {}
+    for tn in tablas_dict:
+        try:
+            res = await db.execute(text(f'SELECT COUNT(*) FROM "{tn}"'))
+            conteos[tn] = int(res.scalar() or 0)
+        except Exception:
+            conteos[tn] = -1
+
     return templates.TemplateResponse(
-        request, "tablas.html", {"tablas": tablas_dict, "relaciones": relaciones}
+        request,
+        "tablas.html",
+        {"tablas": tablas_dict, "relaciones": relaciones, "conteos": conteos},
     )
 
 
