@@ -110,6 +110,7 @@ async def probar_ejercicio_endpoint(
         "ok": resultado.ok,
         "mensaje": resultado.mensaje,
         "error": resultado.error,
+        "diagnostico": resultado.diagnostico,
         "coinciden_columnas": resultado.coinciden_columnas,
         "coinciden_filas": resultado.coinciden_filas,
         "columnas_esperadas": resultado.columnas_esperadas,

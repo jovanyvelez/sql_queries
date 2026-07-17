@@ -42,6 +42,23 @@
     .feedback-warning { background: #2b2300; color: #d2991d; border: 1px solid #d2991d; }
 
     .feedback-msg { color: #c9d1d9; font-size: 0.88rem; margin-bottom: 0.5rem; }
+    .feedback-diag {
+        background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.3);
+        border-left: 3px solid #58a6ff; border-radius: 0 6px 6px 0;
+        padding: 0.6rem 0.8rem; margin: 0.6rem 0 0.75rem; font-size: 0.86rem; line-height: 1.5;
+    }
+    .error-tecnico { margin-top: 0.5rem; }
+    .error-tecnico summary {
+        cursor: pointer; color: #6e7681; font-size: 0.78rem; user-select: none;
+        padding: 0.2rem 0;
+    }
+    .error-tecnico summary:hover { color: #8b949e; }
+    .error-tecnico-pre {
+        margin: 0.4rem 0 0; background: #0d1117; color: #f85149;
+        border: 1px solid #30363d; border-radius: 6px; padding: 0.6rem 0.75rem;
+        font-family: "Consolas","Monaco","Courier New",monospace; font-size: 0.78rem;
+        line-height: 1.5; overflow-x: auto; white-space: pre-wrap;
+    }
 
     .comparacion-tablas {
         display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;

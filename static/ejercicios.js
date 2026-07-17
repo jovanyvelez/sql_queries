@@ -103,18 +103,23 @@
             html += '<div class="feedback-msg">¡Tu consulta produce el resultado esperado!</div>';
         } else {
             var titulo = data.mensaje === "wrong-columns" ? "Columnas incorrectas"
-                : data.mensaje === "wrong-order" ? "Filas correctas pero orden distinto"
-                : data.mensaje === "wrong-rows" ? "Las filas no coinciden"
+                : data.mensaje === "wrong-order" ? "Orden incorrecto"
+                : data.mensaje === "wrong-rows" ? "Resultado incorrecto"
+                : data.mensaje === "execution-error" ? "Error de ejecución"
+                : data.mensaje === "invalid" ? "Consulta no válida"
                 : "Revisar";
             html += '<span class="feedback-badge feedback-error">✗ ' + escapeHtml(titulo) + "</span>";
-            if (data.error) {
-                html += '<div class="feedback-msg">' + escapeHtml(data.error) + "</div>";
+            // Diagnóstico principal (mensaje pedagógico en español)
+            if (data.diagnostico) {
+                html += '<div class="feedback-msg feedback-diag">' + escapeHtml(data.diagnostico) + "</div>";
             }
-            if (data.mensaje === "wrong-order") {
-                html += '<div class="feedback-msg">El ejercicio requiere un orden específico (usa ORDER BY).</div>';
+            // Error técnico bajo <details> (disponible pero no ruidoso)
+            if (data.error && (data.mensaje === "execution-error" || data.mensaje === "invalid" || data.mensaje === "server-error")) {
+                html += '<details class="error-tecnico"><summary>Ver error técnico</summary><pre class="error-tecnico-pre">' + escapeHtml(data.error) + "</pre></details>";
             }
-            // Comparación lado a lado
-            if (data.columnas_esperadas && data.columnas_obtenidas) {
+            // Comparación lado a lado (solo si hay columnas que comparar)
+            if (data.columnas_esperadas && data.columnas_obtenidas
+                && data.columnas_esperadas.length > 0) {
                 html += '<div class="comparacion-tablas">';
                 html += '<div class="comparacion-col"><h4>Esperado</h4>' + tablaHtml(data.columnas_esperadas, data.filas_esperadas) + "</div>";
                 html += '<div class="comparacion-col"><h4>Tu resultado</h4>' + tablaHtml(data.columnas_obtenidas, data.filas_obtenidas) + "</div>";
