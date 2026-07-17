@@ -40,12 +40,13 @@ Aplicacion web educativa que adapta el curso **CS50's Introduction to Databases 
 
 El curso **CS50 SQL** de Harvard University ensena bases de datos usando SQLite como motor. Este proyecto lo adapta al espanol y lo migra a PostgreSQL, ofreciendo:
 
-- **Contenido traducido** de las 2 primeras clases (`Clase 0: Consultas` y `Clase 1: Relaciones`), convertido de Markdown a paginas HTML con Jinja2.
-- **67 ejercicios interactivos** (35 de Consultas + 32 de Relaciones) con enunciado, indicador de dificultad y hoja de respuestas con las consultas solucion.
-- **Consola SQL interactiva** que ejecuta consultas reales contra PostgreSQL, con resultados renderizados en tabla.
-- **Explorador de esquema** (`/tablas`) que consulta `information_schema` en tiempo real y muestra columnas, tipos, nulabilidad y valores por defecto de cada tabla.
-- **Modo oscuro** completo desde el CSS unificado.
+- **Contenido modular traducido** de las 2 primeras clases (`Consultas` y `Relaciones`), dividido en **11 módulos cortos por tema** (SELECT, WHERE, JOIN, GROUP BY...), cada uno con teoría focalizada y ejercicios al final.
+- **67 ejercicios interactivos** (35 de Consultas + 32 de Relaciones) con **corrección automática**: el estudiante escribe su SQL y la app le dice al instante si es correcto, y **por qué no lo es** (filas/columnas esperadas vs. obtenidas, conteos, errores de sintaxis traducidos a espanol de principiante).
+- **Consola SQL interactiva** con editor con resaltado de sintaxis (CodeMirror), historial persistente y exportación a CSV. Ejecuta consultas reales contra PostgreSQL (solo lectura, segura).
+- **Explorador de esquema** (`/tablas`) que consulta `information_schema` en tiempo real: columnas, tipos, claves primarias/foráneas (con badges visuales), conteo de filas, diagrama ER (Mermaid) y buscador con resaltado.
+- **Modo oscuro** completo, responsive y accesible (focus-visible, aria-current, botón volver arriba, sidebar con scrollspy).
 - **Enfoque didactico** tanto para aprender SQL como para entender como se construye una app web con FastAPI y arquitectura multicapa.
+- **Página de inicio** motivadora con hero, estadísticas animadas, fuentes originales del curso de Harvard y créditos.
 
 ---
 
@@ -60,9 +61,11 @@ El curso **CS50 SQL** de Harvard University ensena bases de datos usando SQLite 
 | Driver async | asyncpg 0.31 | Conector asincrono de alto rendimiento entre Python y PostgreSQL |
 | SQL toolkit | SQLAlchemy 2.0 | Motor asincrono, gestion de sesiones y construccion de consultas con `text()` |
 | Motor de plantillas | Jinja2 (via `fastapi.templating`) | Renderizado de HTML con herencia de templates (`base.html`) |
-| CSS | 1 solo archivo (`estilos.css`, ~850 lineas) | Modo oscuro completo (GitHub Dark), responsive, sin frameworks |
+| CSS | 1 solo archivo (`estilos.css`, ~1000 lineas) | Modo oscuro completo (GitHub Dark), responsive, sin frameworks |
+| Editor SQL | CodeMirror 5 (CDN) | Resaltado de sintaxis, autocompletado e historial en la consola y ejercicios |
+| Highlight | Prism.js (CDN) | Resaltado de bloques SQL en clases y respuestas |
 | Diagramas | Mermaid.js (CDN) | Diagramas Entidad-Relacion renderizados en el navegador |
-| Markdown → HTML | markdown-it-py | Script offline `convertir_md.py` para generar el contenido de las clases |
+| Markdown → HTML | markdown-it-py | Script offline `convertir_md.py` para generar los parciales de contenido |
 | Variables de entorno | python-dotenv | Carga de `DATABASE_URL` desde `.env` |
 
 ---
@@ -138,18 +141,24 @@ Este proyecto implementa una **arquitectura de 3 capas** (three-tier architectur
 ┌───────────────────────────────────────────────────────────────┐
 │         CAPA 1 — PRESENTACION (Routers + Templates)            │
 │                                                               │
-│  routers/clases.py           →  templates/clase{0,1}.html     │
+│  routers/clases.py           →  templates/curso_index.html    │
+│    /clases/{curso}           →  templates/modulo.html         │
+│    /clases/{curso}/{slug}    →  (con sidebar de módulos)      │
+│    redirect 301 clase0/clase1                                │
 │  routers/ejercicios.py       →  templates/ejercicios.html     │
+│    POST /ejercicios/probar/{id} → JSON (corrección automática)│
 │                               →  templates/respuestas.html    │
 │  routers/consola.py          →  templates/consola.html        │
-│  main.py  (/, /tablas, /health)→ templates/index.html,         │
-│                                   tablas.html, 500.html         │
+│    GET /consola              →  POST /consulta (HTML fallback)│
+│    POST /consulta/api        →  JSON (fetch sin reload)       │
+│  main.py (/, /tablas,        →  templates/index.html,         │
+│    /health, /api/estadisticas)  tablas.html, 500.html         │
 │  templating.py  (instancia Jinja2Templates compartida)        │
 │                                                               │
 │  RESPONSABILIDAD: Recibir HTTP, delegar a servicios,          │
 │  renderizar HTML con Jinja2, devolver respuestas.             │
 │  NUNCA accede directamente a la base de datos                 │
-│  (salvo la ruta /health y /consulta via get_db).              │
+│  (salvo /health, /tablas, /consulta y /api/estadisticas).     │
 └────────────────────────┬──────────────────────────────────────┘
                          │  llama a funciones de servicios
                          ▼
@@ -159,7 +168,12 @@ Este proyecto implementa una **arquitectura de 3 capas** (three-tier architectur
 │  services/ejercicios.py        →  Dataclass Ejercicio         │
 │  services/clase0_ejercicios.py →  35 ejercicios (Consultas)   │
 │  services/clase1_ejercicios.py →  32 ejercicios (Relaciones)  │
+│  services/modulos.py           →  Splitter de contenido en    │
+│                                  módulos (regex + lru_cache)  │
 │  services/validador_sql.py     →  Filtro de SQL peligroso     │
+│  services/validador_ejercicio  →  Comparador de resultados +  │
+│                                  diagnóstico pedagógico +     │
+│                                  traducción de errores PG     │
 │  services/rate_limit.py        →  Control de abuso por IP     │
 │  services/keep_alive.py        →  Ping periodico a BD         │
 │                                                               │
@@ -189,60 +203,56 @@ Este proyecto implementa una **arquitectura de 3 capas** (three-tier architectur
 
 Es la **puerta de entrada HTTP**. Cada archivo en `routers/` define un `APIRouter` de FastAPI que agrupa endpoints relacionados. No contienen logica de negocio: reciben la peticion, delegan a los servicios, y devuelven HTML (o JSON).
 
-**Archivo: `routers/clases.py`** — 16 lineas
+**Archivo: `routers/clases.py`** — rutas modulares + redirects
 ```python
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
-from templating import templates
+from services.modulos import obtener_modulos, obtener_modulo, curso_titulo
 
-router = APIRouter()
+@router.get("/{curso}", response_class=HTMLResponse)
+async def curso_index(request: Request, curso: str):
+    return templates.TemplateResponse(request, "curso_index.html", {
+        "curso": curso, "curso_titulo": curso_titulo(curso),
+        "modulos": obtener_modulos(curso),
+    })
 
-@router.get("/clase0", response_class=HTMLResponse)
-async def clase0(request: Request):
-    return templates.TemplateResponse(request, "clase0.html")
-
-@router.get("/clase1", response_class=HTMLResponse)
-async def clase1(request: Request):
-    return templates.TemplateResponse(request, "clase1.html")
-```
-Sirve el contenido teorico de cada clase. No toca la base de datos: son paginas HTML generadas previamente por `convertir_md.py`. Al estar dentro del prefijo `/clases` (definido en `main.py`), las rutas finales son `GET /clases/clase0` y `GET /clases/clase1`.
-
-**Archivo: `routers/ejercicios.py`** — 60 lineas
-```python
-from services.clase0_ejercicios import ejercicios_clase0
-from services.clase1_ejercicios import ejercicios_clase1
-
-@router.get("/clase0", response_class=HTMLResponse)
-async def ejercicios_c0(request: Request):
-    return templates.TemplateResponse(request, "ejercicios.html", {
-        "clase_num": 0, "clase_titulo": "Consultas",
-        "ejercicios": ejercicios_clase0(),
+@router.get("/{curso}/{slug}", response_class=HTMLResponse)
+async def modulo_detalle(request: Request, curso: str, slug: str):
+    return templates.TemplateResponse(request, "modulo.html", {
+        "curso": curso, "modulo": obtener_modulo(curso, slug), ...
     })
 ```
-Cuatro endpoints para mostrar ejercicios y respuestas de cada clase. El router llama a las funciones de la **capa de servicios** (`ejercicios_clase0()`, `ejercicios_clase1()`) para obtener los datos, y los pasa a la plantilla. Esto es la separacion en accion: el router no sabe como se generan los ejercicios, solo los recibe y los renderiza.
+Sirve el contenido teorico **modular**: cada curso (`consultas`, `relaciones`) se divide en ~6 módulos cortos por tema. Las URLs antiguas `/clases/clase0` y `/clase1` redirigen (301) a `/clases/consultas` y `/clases/relaciones`. El contenido se parte desde `templates/content/{curso}.html` por `services/modulos.py` (regex + `lru_cache`), que agrupa secciones `<h2>` y ejercicios en módulos. Cada módulo incluye teoría + ejercicios interactivos + navegación anterior/siguiente.
 
-**Archivo: `routers/consola.py`** — 75 lineas (el endpoint mas complejo)
+**Archivo: `routers/ejercicios.py`** — listados + corrección automática
 ```python
-from sqlalchemy import text
+from services.validador_ejercicio import probar_ejercicio
 
-@router.post("/consulta", response_class=HTMLResponse)
-async def ejecutar_consulta_usuario(
-    request: Request,
-    db: AsyncSession = Depends(get_db),       # ← Capa 3 inyectada
-    sql: str = Form(""),
-    _rate: None = Depends(limitar_consulta),  # ← Capa 2 inyectada
-):
-    consulta = validar_consulta(sql)           # ← Capa 2
+@router.post("/probar/{ejercicio_id}")
+async def probar_ejercicio_endpoint(request, ejercicio_id, db):
+    resultado = await probar_ejercicio(db, sql_usuario, ejercicio.sql,
+                                       ejercicio.orden_importa)
+    return JSONResponse({"ok": resultado.ok, "diagnostico": resultado.diagnostico, ...})
+```
+Cinco endpoints: listado de ejercicios y hojas de respuestas por clase, más `POST /ejercicios/probar/{id}` que ejecuta la SQL del estudiante contra PostgreSQL (en transacción READ ONLY), la compara con la SQL esperada del ejercicio, y devuelve un **diagnóstico pedagógico** en español (conteos de filas, columnas faltantes/sobrantes, errores traducidos). El frontend (`static/ejercicios.js`) muestra el diagnóstico + comparación lado a lado.
+
+**Archivo: `routers/consola.py`** — consola SQL interactiva
+```python
+@router.post("/consulta", response_class=HTMLResponse)  # fallback sin JS
+async def ejecutar_consulta_usuario(request, db, sql: str = Form(""), ...):
+    consulta = validar_consulta(sql)
     async with db.begin() as tx:
         await db.execute(text("SET TRANSACTION READ ONLY"))
         result = await db.execute(text(consulta))
         filas = result.mappings().all()
         resultado = [dict(f) for f in filas[:50]]
         await tx.rollback()
-```
-Este endpoint recibe SQL desde un `<textarea>` via POST, lo valida (servicio `validador_sql.py`), lo ejecuta contra PostgreSQL (capa de datos `get_db()`), y renderiza los resultados en una tabla HTML. Si hay error, lo captura y lo muestra al usuario. El rate limiter corre como **dependencia de FastAPI** que se evalua antes de ejecutar el handler.
 
-**Archivo: `main.py`** — 58 lineas (aplicacion principal)
+@router.post("/consulta/api")  # JSON para fetch sin reload
+async def ejecutar_consulta_api(request, db, ...):
+    ...  # devuelve {ok, columns, rows, elapsed_ms, error}
+```
+Dos endpoints: `POST /consulta` (HTML, fallback sin JS) y `POST /consulta/api` (JSON, usado por el frontend con `fetch` para ejecutar sin recargar la página). El frontend (`static/consola.js`) monta un editor **CodeMirror** con resaltado SQL, mantiene un **historial** en `localStorage`, permite **exportar CSV** y muestra los resultados en una tabla con cabecera sticky. El rate limiter corre como **dependencia de FastAPI** que se evalua antes del handler.
+
+**Archivo: `main.py`** — aplicacion principal
 ```python
 from contextlib import asynccontextmanager
 
@@ -258,7 +268,7 @@ app.include_router(clases.router, prefix="/clases")
 app.include_router(ejercicios.router, prefix="/ejercicios")
 app.include_router(consola.router)
 ```
-Registra los routers con sus prefijos, monta los archivos estaticos, define el `lifespan` para la tarea de keep-alive, y expone tres rutas propias: `GET /` (pagina de inicio), `GET /tablas` (esquema de la BD consultando `information_schema` en tiempo real) y `GET /health` (healthcheck que ejecuta `SELECT 1` para verificar conectividad con la BD). Tambien define un manejador global `@app.exception_handler(500)` que renderiza `500.html`.
+Registra los routers con sus prefijos, monta los archivos estaticos, define el `lifespan` para la tarea de keep-alive, y expone cuatro rutas propias: `GET /` (página de inicio con hero, estadísticas animadas y fuentes originales), `GET /tablas` (esquema de la BD con PK/FK, diagrama ER y conteo de filas en vivo), `GET /health` (healthcheck) y `GET /api/estadisticas` (conteo de filas por tabla en JSON, consumido por el home). Tambien define un manejador global `@app.exception_handler(500)` que renderiza `500.html`.
 
 ### Capa 2 — Servicios (Logica de negocio)
 
@@ -278,8 +288,10 @@ class Ejercicio:
     dificultad: str                  # "basico" | "intermedio" | "avanzado"
     sql: str                         # la consulta SQL solucion
     params: dict[str, Any] = field(default_factory=dict)
+    orden_importa: bool = False      # si el ORDER BY del resultado debe coincidir
+    modulo: str = ""                 # slug del módulo al que pertenece
 ```
-Un **dataclass** puro: no tiene logica, es una simple bolsa de datos que define la *forma* de un ejercicio. Todos los modulos de ejercicios instancian esta clase. Los templates Jinja2 reciben listas de `Ejercicio` y acceden a sus atributos (`e.numero`, `e.titulo`, `e.dificultad`, `e.sql`...). Usar un dataclass en vez de un diccionario da autocompletado en el editor y evidencia errores de tipeo en tiempo de desarrollo.
+Un **dataclass** puro: no tiene logica, es una simple bolsa de datos que define la *forma* de un ejercicio. El campo `orden_importa` le dice al comparador si debe exigir el mismo orden de filas (ejercicios con `ORDER BY`) o solo el mismo multiconjunto. El campo `modulo` se asigna en tiempo de construcción desde `services/modulos.py`. Usar un dataclass en vez de un diccionario da autocompletado en el editor y evidencia errores de tipeo en tiempo de desarrollo.
 
 **Archivos: `services/clase0_ejercicios.py` y `services/clase1_ejercicios.py`**
 
@@ -288,6 +300,35 @@ Cada uno exporta una funcion que devuelve una lista de objetos `Ejercicio`:
 - `ejercicios_clase1()` → 32 ejercicios sobre INNER JOIN, LEFT/RIGHT/FULL JOIN, NATURAL JOIN, subconsultas, INTERSECT, UNION, EXCEPT, GROUP BY + HAVING.
 
 Cada ejercicio incluye su **consulta SQL solucion** (en sintaxis PostgreSQL). Estos archivos son puramente declarativos: no tienen logica compleja, solo construyen y devuelven listas.
+
+**Archivo: `services/modulos.py`** — Splitter de contenido en módulos
+
+Parte el HTML del contenido (`templates/content/{curso}.html`) en secciones por `<h2>` usando regex, las agrupa en módulos temáticos según un mapping declarativo, y les adjunta los ejercicios correspondientes. Cachea el resultado con `lru_cache` (el contenido es estático).
+
+```python
+@lru_cache(maxsize=4)
+def obtener_modulos(curso: str) -> list[Modulo]:
+    html = (CONTENT_DIR / f"{curso}.html").read_text(encoding="utf-8")
+    secciones = _split_por_h2(html)  # regex: re.split(r'(?=<h2[ >])', html)
+    # agrupa secciones por módulo + adjunta ejercicios por mapping
+    ...
+    return modulos  # 6 para consultas, 5 para relaciones
+```
+
+Cada `Modulo` tiene: `slug`, `titulo`, `descripcion`, `teoria_html` (las secciones h2 agrupadas), `ejercicios` (los `Ejercicio` que pertenecen a ese módulo), e `intro` (módulo sin ejercicios). Funciones auxiliares `obtener_modulo`, `curso_siguiente_modulo` y `curso_anterior_modulo` soportan la navegación.
+
+**Archivo: `services/validador_ejercicio.py`** — Corrección automática + diagnóstico pedagógico
+
+Ejecuta la SQL del estudiante y la SQL esperada en una misma transacción READ ONLY, compara columnas (set + orden) y filas (multiset o estricto según `orden_importa`), y produce un **diagnóstico en español** que explica por qué no coincide:
+
+```python
+async def probar_ejercicio(db, sql_usuario, sql_esperado, orden_importa) -> ResultadoEjercicio:
+    # ... ejecuta ambas, compara ...
+    diagnostico = _diagnosticar(cols_esp, filas_esp, cols_obt, filas_obt, orden_importa, ...)
+    return ResultadoEjercicio(ok=..., diagnostico=diagnostico, ...)
+```
+
+El diagnóstico distingue: conteo de filas distinto (con pistas: "falta WHERE/LIMIT", "filtra de más", "0 filas"), mismo conteo pero valores distintos, columnas faltantes/sobrantes/orden, y ORDER BY requerido. Además `_traducir_error_pg` mapea los errores más comunes de PostgreSQL a español de principiante (tabla inexistente, sintaxis, referencia ambigua, etc.), conservando el error técnico original bajo un `<details>` colapsable.
 
 **Archivo: `services/validador_sql.py`** — Seguridad de consultas
 ```python
@@ -647,11 +688,14 @@ Todas las plantillas heredan de `templates/base.html` usando `{% extends "base.h
 ```
 
 Cada pagina define los bloques que necesita:
-- `clase0.html` / `clase1.html`: definen `title` y `content` con el HTML de la clase.
-- `consola.html`: define `title`, `content`, `extra_css` (ancho extendido) y `extra_js` (atajo Ctrl+Enter).
-- `ejercicios.html`: define `title` y `content` iterando sobre `{% for e in ejercicios %}`.
-- `respuestas.html`: define `title` y `content` mostrando `{{ e.sql }}` en bloques `<pre>`.
-- `tablas.html`: define `title` y `content` iterando sobre `{% for nombre, columnas in tablas.items() %}`, mostrando cada tabla como una card con sus columnas, tipos y restricciones.
+- `index.html`: página de inicio con hero, estadísticas animadas (count-up), pasos de "cómo funciona", tarjetas de contenido, tabla de la BD con conteo en vivo (`/api/estadisticas`) y sección de fuentes originales del curso de Harvard.
+- `curso_index.html`: índice de un curso (lista de módulos con barra de progreso vía localStorage).
+- `modulo.html`: un módulo individual (teoría focalizada + ejercicios interactivos al final + sidebar de módulos + nav anterior/siguiente).
+- `consola.html`: consola SQL con CodeMirror, historial, export CSV y `extra_js` (atajo Ctrl+Enter).
+- `ejercicios.html`: listado de ejercicios con CodeMirror inline por card y corrección automática.
+- `respuestas.html`: hoja de respuestas con `{{ e.sql }}` en bloques `<pre>` con botón copiar.
+- `tablas.html`: esquema de la BD con PK/FK badges, diagrama ER (Mermaid), buscador con resaltado, chips de salto y cards colapsables.
+- `base.html`: layout comun con nav, Prism.js (highlight SQL), Mermaid.js, botón volver arriba y bloques extensibles.
 
 Los templates reciben datos desde los routers via `TemplateResponse(request, "plantilla.html", {"clave": valor})`. Jinja2 renderiza el HTML combinando la plantilla base con los bloques definidos por cada pagina.
 
@@ -661,38 +705,44 @@ Los templates reciben datos desde los routers via `TemplateResponse(request, "pl
 
 ## Conversion de Markdown a HTML
 
-El contenido teorico de las clases existe como archivos **Markdown** (`.md`) fuera del proyecto. El script `convertir_md.py` los transforma en plantillas Jinja2 listas para servir.
+El contenido teorico original existe como archivos **Markdown** (`.md`) fuera del proyecto. El script `convertir_md.py` los transforma en **parciales HTML planos** que `services/modulos.py` parte en módulos.
 
-El pipeline de conversion hace 5 transformaciones:
+El pipeline de conversion hace 4 transformaciones:
 
 1. **Reescribe rutas de imagenes**: `![](images/p6.jpg)` → `![](/static/images/p6.jpg)` para que funcionen con el montaje de archivos estaticos de FastAPI.
 2. **Convierte Markdown a HTML** con `markdown_it` (soporte CommonMark + tablas).
 3. **Envuelve tablas** en `<div class="table-wrapper">` para permitir scroll horizontal en pantallas chicas (las tablas de datos del Booker Prize son anchas).
 4. **Convierte bloques Mermaid**: los bloques de codigo marcados como ` ```mermaid ` se transforman en `<div class="mermaid">` para que la libreria Mermaid.js (cargada en `base.html`) los renderice como diagramas ER en el navegador.
-5. **Envuelve el HTML** en una plantilla Jinja2 que extiende `base.html`.
+
+El resultado se escribe en `templates/content/{curso}.html` (HTML plano, sin `{% extends %}`), que es la fuente única que `services/modulos.py` parte por `<h2>` en módulos.
 
 El script se ejecuta manualmente cuando el contenido Markdown cambia:
 ```bash
 uv run python convertir_md.py
 ```
 
-Esto genera `templates/clase0.html` y `templates/clase1.html`.
+Esto genera `templates/content/consultas.html` y `templates/content/relaciones.html`.
 
 ---
 
 ## Ejercicios y sistema de auto-evaluacion
 
-Cada clase tiene su propio conjunto de ejercicios, definidos en la capa de servicios:
+Cada curso tiene su propio conjunto de ejercicios, definidos en la capa de servicios y repartidos en módulos temáticos:
 
-- **Clase 0 (Consultas):** 35 ejercicios en `services/clase0_ejercicios.py`
-  - Basicos (1-7, 26-29): SELECT *, columnas, LIMIT, WHERE =/!=/<>/NOT, LIKE %/\_, OR
-  - Intermedios (8-15, 30-32): ILIKE, BETWEEN, IS NULL, AND/OR con parentesis, ORDER BY mixto
-  - Avanzados (16-25, 33-35): AVG, COUNT DISTINCT, MAX, MIN, SUM, subconsultas, GROUP BY, HAVING
+- **Curso Consultas:** 35 ejercicios en `services/clase0_ejercicios.py`, repartidos en 6 módulos:
+  - *Bases y PostgreSQL* (intro, sin ejercicios)
+  - *SELECT y LIMIT*: SELECT *, columnas, LIMIT
+  - *WHERE y NULL*: =, !=, <>, NOT, AND/OR, IS NULL, NOT IN
+  - *LIKE y patrones*: %, _, ILIKE
+  - *Rangos y ORDER BY*: comparadores, BETWEEN, ORDER BY ASC/DESC
+  - *Funciones de agregación*: AVG, COUNT DISTINCT, MAX, MIN, SUM, GROUP BY, HAVING, subconsultas
 
-- **Clase 1 (Relaciones):** 32 ejercicios en `services/clase1_ejercicios.py`
-  - Basicos (1-7, 23-24): INNER JOIN, LEFT JOIN, NATURAL JOIN, subconsultas simples
-  - Intermedios (8-15, 25-28): IN con subconsulta, INTERSECT, UNION, EXCEPT, FULL JOIN
-  - Avanzados (16-22, 29-32): Subconsultas anidadas de 3 niveles, JOIN + GROUP BY + LIMIT, HAVING COUNT >= N
+- **Curso Relaciones:** 32 ejercicios en `services/clase1_ejercicios.py`, repartidos en 5 módulos:
+  - *Modelo ER y claves* (intro, sin ejercicios)
+  - *Subconsultas e IN*: subconsultas escalares, IN, NOT IN
+  - *JOIN*: INNER, LEFT, RIGHT, FULL, NATURAL JOIN
+  - *Conjuntos*: INTERSECT, UNION, EXCEPT
+  - *Grupos*: GROUP BY, HAVING, agregaciones con JOIN
 
 Cada ejercicio se define como una instancia del dataclass `Ejercicio`:
 
@@ -700,20 +750,19 @@ Cada ejercicio se define como una instancia del dataclass `Ejercicio`:
 Ejercicio(
     id="c0_01",
     numero=1,
-    titulo="Primera consulta",
-    enunciado="Escribe una consulta para seleccionar todos los libros de la tabla `libros`.",
+    titulo="Explora la tabla",
+    enunciado="Muestra todas las columnas de lista_larga. Solo 5 resultados.",
     dificultad="basico",
-    sql="SELECT * FROM libros;"
+    sql="SELECT * FROM lista_larga LIMIT 5",
+    orden_importa=False,
 )
 ```
 
-Las paginas de ejercicios (`/ejercicios/clase0`, `/ejercicios/clase1`) muestran cada ejercicio en una card con:
-- Numero y titulo.
-- Badge de dificultad (verde = basico, amarillo = intermedio, rojo = avanzado).
-- Enunciado.
-- Borde izquierdo coloreado segun dificultad.
+Los ejercicios se muestran de dos formas:
+1. **Dentro de cada módulo** (`/clases/{curso}/{slug}`): al final de la teoría, cada ejercicio tiene un editor CodeMirror inline + botón "Probar mi SQL" que envía la consulta a `POST /ejercicios/probar/{id}` y muestra el **diagnóstico pedagógico** (conteos, columnas, errores traducidos) + comparación lado a lado con el resultado esperado. El estado "resuelto" se guarda en `localStorage`.
+2. **Página de ejercicios clásica** (`/ejercicios/clase0`, `/clase1`): listado completo con cards, badges de dificultad y enlaces a la hoja de respuestas.
 
-Las hojas de respuestas (`/ejercicios/clase0/respuestas`, `/ejercicios/clase1/respuestas`) muestran el enunciado seguido de la **consulta SQL solucion** en un bloque `<pre>`. Incluyen una advertencia amarilla animando al estudiante a intentar resolver el ejercicio por su cuenta antes de mirar la respuesta.
+Las hojas de respuestas (`/ejercicios/clase0/respuestas`, `/clase1/respuestas`) muestran el enunciado seguido de la **consulta SQL solucion** en un bloque `<pre>` con botón copiar. Incluyen una advertencia amarilla animando al estudiante a intentar resolver el ejercicio por su cuenta antes de mirar la respuesta.
 
 ---
 
@@ -727,9 +776,11 @@ Las hojas de respuestas (`/ejercicios/clase0/respuestas`, `/ejercicios/clase1/re
 | **Template Method** | `templates/base.html` con `{% block %}` | Define un esqueleto comun y deja que cada pagina rellene los bloques |
 | **Strategy** | `validador_sql.py` (regex precompilados como estrategias de eliminacion) | Diferentes tipos de literales SQL se eliminan con diferentes estrategias regex |
 | **Observer (simplificado)** | `lifespan` de FastAPI `@asynccontextmanager` | Reacciona a eventos de inicio/apagado del servidor |
-| **Dataclass (DTO)** | `services/ejercicios.py` | Transporta datos entre capas sin logica acoplada |
+| **Dataclass (DTO)** | `services/ejercicios.py`, `services/modulos.py` (`Modulo`) | Transporta datos entre capas sin logica acoplada |
 | **Generator (yield)** | `get_db()` | Manejo automatico de recursos: la sesion se crea y se destruye sin intervencion manual |
 | **Sliding Window** | `rate_limit.py` | Control de tasa con ventana deslizante en memoria |
+| **Memoization** | `services/modulos.py` (`lru_cache`) | Cachea el split de contenido en módulos (estático) evitando recálculo por request |
+| **Strategy (comparador)** | `services/validador_ejercicio.py` | Compara filas como multiset o estricto según `orden_importa` |
 
 ---
 
@@ -741,7 +792,7 @@ consultas_sql/
 ├── main.py                      # Punto de entrada: app FastAPI, lifespan, rutas /, /tablas y /health
 ├── database.py                  # Capa 3: conexion async a PostgreSQL (SQLAlchemy + asyncpg)
 ├── templating.py                # Instancia unica compartida de Jinja2Templates
-├── convertir_md.py              # Script offline: Markdown → plantillas Jinja2 (clase0/1.html)
+├── convertir_md.py              # Script offline: Markdown → parciales HTML (content/{curso}.html)
 ├── pyproject.toml               # Configuracion del proyecto + dependencias (uv / pip)
 ├── requirements.txt             # Dependencias para pip / despliegue en Vercel
 ├── datos.sql                    # Dump completo de la BD (esquema + datos de 10 tablas)
@@ -753,31 +804,42 @@ consultas_sql/
 │
 ├── routers/                     # CAPA 1 — Presentacion / Controladores
 │   ├── __init__.py              # Marca el directorio como paquete Python
-│   ├── clases.py                # GET /clases/clase0, GET /clases/clase1
-│   ├── ejercicios.py            # GET /ejercicios/clase{0,1}, GET /ejercicios/clase{0,1}/respuestas
-│   └── consola.py               # GET /consola, POST /consulta
+│   ├── clases.py                # GET /clases/{curso}, /clases/{curso}/{slug} + redirects 301
+│   ├── ejercicios.py            # GET /ejercicios/{clase}, respuestas + POST /probar/{id}
+│   └── consola.py               # GET /consola, POST /consulta, POST /consulta/api
 │
 ├── services/                    # CAPA 2 — Logica de negocio
 │   ├── ejercicios.py            # Dataclass Ejercicio (modelo de datos)
-│   ├── clase0_ejercicios.py     # 35 ejercicios de la Clase 0 (Consultas)
-│   ├── clase1_ejercicios.py     # 32 ejercicios de la Clase 1 (Relaciones)
+│   ├── clase0_ejercicios.py     # 35 ejercicios del curso Consultas
+│   ├── clase1_ejercicios.py     # 32 ejercicios del curso Relaciones
+│   ├── modulos.py               # Splitter de contenido en módulos (regex + lru_cache)
 │   ├── validador_sql.py         # Validador de seguridad: solo SELECT / WITH / EXPLAIN
+│   ├── validador_ejercicio.py   # Comparador de resultados + diagnóstico + traducción errores PG
 │   ├── rate_limit.py            # Rate limiter: max 10 consultas/min por IP
 │   └── keep_alive.py            # Ping a PostgreSQL cada 4 min (evita suspension en Neon)
 │
 ├── templates/                   # Vistas Jinja2
-│   ├── base.html                # Layout comun: nav, CSS, Mermaid.js, bloques extensibles
-│   ├── index.html               # Pagina de inicio con descripcion y esquema de la BD
-│   ├── tablas.html              # Esquema detallado: columnas, tipos, nulabilidad (desde information_schema)
-│   ├── clase0.html              # Contenido Clase 0: Consultas (generado por convertir_md.py)
-│   ├── clase1.html              # Contenido Clase 1: Relaciones (generado por convertir_md.py)
-│   ├── ejercicios.html          # Listado de ejercicios con cards y badges de dificultad
-│   ├── respuestas.html          # Hoja de respuestas con consultas SQL solucion
-│   ├── consola.html             # Consola SQL interactiva (textarea + tabla de resultados)
+│   ├── base.html                # Layout comun: nav, Prism, Mermaid, botón volver arriba
+│   ├── index.html               # Home: hero, stats, pasos, features, BD, fuentes originales
+│   ├── curso_index.html         # Índice de un curso con módulos y barra de progreso
+│   ├── modulo.html              # Módulo: teoría + ejercicios + sidebar + nav anterior/siguiente
+│   ├── tablas.html              # Esquema: PK/FK, ER, buscador, chips, cards colapsables
+│   ├── ejercicios.html          # Listado de ejercicios con CodeMirror + corrección automática
+│   ├── respuestas.html          # Hoja de respuestas con botón copiar
+│   ├── consola.html             # Consola SQL con CodeMirror, historial, CSV
+│   ├── clase0.html              # [legacy] Contenido original (redirige a /clases/consultas)
+│   ├── clase1.html              # [legacy] Contenido original (redirige a /clases/relaciones)
+│   ├── content/                 # Parciales HTML planos (fuente del splitter de módulos)
+│   │   ├── consultas.html       #   contenido del curso Consultas
+│   │   └── relaciones.html      #   contenido del curso Relaciones
 │   └── 500.html                 # Pagina de error 500
 │
 └── static/                      # Archivos estaticos servidos por FastAPI
-    ├── estilos.css              # CSS unificado (~850 lineas): modo oscuro, responsive
+    ├── estilos.css              # CSS unificado (~1000 lineas): modo oscuro, responsive
+    ├── base.js                  # Prism highlight + botón copiar snippets + volver arriba
+    ├── clases.js                # Sidebar + scrollspy + barra de progreso (clases legacy)
+    ├── consola.js               # CodeMirror + fetch /consulta/api + historial + CSV
+    ├── ejercicios.js            # CodeMirror por ejercicio + probar + feedback + estado
     └── images/                  # Imagenes del curso original (p6.jpg, p8.jpg, etc.)
 ```
 
