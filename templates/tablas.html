@@ -123,10 +123,6 @@
         font-size: 0.78rem; color: #8b949e; font-style: italic; font-weight: 400;
         margin-left: 0.3rem; font-family: inherit;
     }
-    .traduccion-col {
-        font-size: 0.74rem; color: #6e7681; font-style: italic; margin-left: 0.4rem;
-        display: block; margin-top: 0.1rem;
-    }
 
     .leyenda {
         display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
@@ -250,7 +246,7 @@ erDiagram
                     {% for col in columnas %}
                     <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
                         <td class="col-name" data-copy="{{ nombre }}.{{ col.columna }}" scope="row">
-                            <span class="col-label">{{ col.columna }}</span>{% if grupo.es_pset and traducciones_cols and col.columna in traducciones_cols %}<span class="traduccion-col">({{ traducciones_cols[col.columna] }})</span>{% endif %}
+                            <span class="col-label">{{ col.columna }}</span>
                             {% if col.es_pk %}<span class="badge-clave badge-pk" title="Clave primaria">PK</span>{% endif %}
                             {% if col.fk_ref %}<span class="badge-clave badge-fk" title="Clave foránea → {{ col.fk_ref }}">FK</span>{% endif %}
                             <span class="copy-hint">copiar</span>
