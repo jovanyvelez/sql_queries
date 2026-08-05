@@ -62,6 +62,21 @@
         });
         renderHistorial();
     }
+    var esquemaSelect = document.getElementById("esquema-select");
+
+    // Cargar SQL y esquema desde URL (?sql=...&esquema=...)
+    function cargarDesdeUrl() {
+        var params = new URLSearchParams(window.location.search);
+        var sqlParam = params.get("sql");
+        var esqParam = params.get("esquema");
+        if (sqlParam) {
+            editor.setValue(decodeURIComponent(sqlParam));
+            if (esqParam && esquemaSelect) esquemaSelect.value = esqParam;
+            // limpiar la URL para no recargar siempre la misma consulta
+            history.replaceState(null, "", window.location.pathname);
+            ejecutar();
+        }
+    }
 
     // --- Ejecución ----------------------------------------------------------
     var form = document.getElementById("form-consola");
@@ -120,13 +135,14 @@
     async function ejecutar() {
         var sql = editor.getValue().trim();
         if (!sql) { setStatus("Consulta vacía", "error"); return; }
+        var esquema = esquemaSelect ? esquemaSelect.value : "public";
         btnEjecutar.disabled = true;
         setStatus('<span class="spinner"></span>Ejecutando…');
         try {
             var resp = await fetch("/consulta/api", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ sql: sql }),
+                body: JSON.stringify({ sql: sql, esquema: esquema }),
             });
             var data = await resp.json();
             añadirAlHistorial(sql);
@@ -199,4 +215,5 @@
     }
 
     editor.focus();
+    cargarDesdeUrl();
 })();

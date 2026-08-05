@@ -63,12 +63,29 @@
         margin-top: 1rem;
     }
     .resultados-meta h2 { margin: 0; font-size: 1.1rem; border: none; padding: 0; }
+
+    /* Listado de tablas por esquema */
+    .esquema-tablas-lista {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    }
+    @media (max-width: 760px) { .esquema-tablas-lista { grid-template-columns: 1fr; } }
+    .esquema-bloque {
+        background: #0d1117; border: 1px solid #30363d; border-radius: 8px;
+        padding: 0.85rem 1rem;
+    }
+    .esquema-bloque h4 { margin: 0 0 0.5rem; font-size: 0.92rem; color: #e6edf3; border: none; padding: 0; }
+    .esquema-bloque h4 code { color: #79c0ff; font-size: 0.82rem; }
+    .chips-tablas { display: flex; gap: 0.4rem 0.6rem; flex-wrap: wrap; }
+    .chips-tablas code {
+        background: #161b22; color: #79c0ff; padding: 0.18rem 0.5rem;
+        border-radius: 4px; border: 1px solid #30363d; font-size: 0.8rem;
+    }
 </style>
 {% endblock %}
 {% block content %}
 <div class="consola-layout">
     <h1>Consola SQL Interactiva</h1>
-    <p>Escribe y ejecuta consultas SQL directamente contra la base de datos <code>sql_teach</code>. Los resultados se limitan a 50 filas.</p>
+    <p>Escribe y ejecuta consultas SQL directamente contra la base de datos. Los resultados se limitan a 50 filas. Usa el selector de esquema para practicar con las tablas de los Problem Sets.</p>
 
     <div class="card">
         <div class="card-header"><h3>Consulta</h3></div>
@@ -81,6 +98,12 @@
                     <button type="submit" id="btn-ejecutar">Ejecutar (Ctrl+Enter)</button>
                     <button type="button" id="btn-limpiar" class="btn-accion-secundaria">Limpiar</button>
                     <button type="button" id="btn-csv" class="btn-accion-secundaria" disabled>Exportar CSV</button>
+                    <label for="esquema-select" class="consola-status" style="margin-left: 0; color: #8b949e;">Esquema:</label>
+                    <select id="esquema-select" name="esquema" class="historial-select" title="Esquema de PostgreSQL (search_path)">
+                        {% for valor, etiqueta in esquemas %}
+                        <option value="{{ valor }}" {% if valor == esquema_actual %}selected{% endif %}>{{ etiqueta }}</option>
+                        {% endfor %}
+                    </select>
                     <label for="historial-select" class="consola-status" style="margin-left: 0; color: #8b949e;">Historial:</label>
                     <select id="historial-select" class="historial-select" title="Consultas recientes">
                         <option value="">— Consultas recientes —</option>
@@ -122,6 +145,48 @@
                         </div>
                     {% endif %}
                 {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 1.5rem">
+        <div class="card-header"><h3>Tablas disponibles según el esquema</h3></div>
+        <div class="card-body">
+            <p style="color:#8b949e; font-size:0.88rem; margin:0 0 0.75rem">
+                Cambia el selector de <strong>Esquema</strong> de arriba para consultar las tablas de cada Problem Set sin tener que qualificar el nombre. También puedes escribir <code>SET search_path TO dese; SELECT ...</code> directamente.
+            </p>
+            <div class="esquema-tablas-lista" id="esquema-tablas-lista">
+                <div class="esquema-bloque" data-esquema="public">
+                    <h4>Curso (<code>public</code>)</h4>
+                    <div class="chips-tablas">
+                        <code>editoriales</code> <code>autores</code> <code>traductores</code>
+                        <code>libros</code> <code>autoria</code> <code>traduccion</code>
+                        <code>puntuaciones</code> <code>lista_larga</code>
+                        <code>leones_marinos</code> <code>migraciones</code>
+                    </div>
+                </div>
+                <div class="esquema-bloque" data-esquema="dese">
+                    <h4>DESE (<code>dese</code>)</h4>
+                    <div class="chips-tablas">
+                        <code>districts</code> <code>schools</code>
+                        <code>graduation_rates</code> <code>expenditures</code>
+                        <code>staff_evaluations</code>
+                    </div>
+                </div>
+                <div class="esquema-bloque" data-esquema="moneyball">
+                    <h4>Moneyball (<code>moneyball</code>)</h4>
+                    <div class="chips-tablas">
+                        <code>players</code> <code>teams</code>
+                        <code>salaries</code> <code>performances</code>
+                    </div>
+                </div>
+                <div class="esquema-bloque" data-esquema="packages">
+                    <h4>Packages (<code>packages</code>)</h4>
+                    <div class="chips-tablas">
+                        <code>addresses</code> <code>packages</code>
+                        <code>drivers</code> <code>scans</code>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

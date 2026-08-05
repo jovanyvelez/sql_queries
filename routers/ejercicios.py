@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +12,17 @@ from services.validador_ejercicio import probar_ejercicio
 from templating import templates
 
 router = APIRouter()
+
+
+def _jsonable(obj):
+    """Convierte Decimal y otros tipos no serializables a tipos JSON-safe."""
+    if isinstance(obj, Decimal):
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _jsonable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_jsonable(v) for v in obj]
+    return obj
 
 
 def _todos_los_ejercicios() -> dict[str, object]:
@@ -119,9 +132,9 @@ async def probar_ejercicio_endpoint(
         "coinciden_columnas": resultado.coinciden_columnas,
         "coinciden_filas": resultado.coinciden_filas,
         "columnas_esperadas": resultado.columnas_esperadas,
-        "filas_esperadas": resultado.filas_esperadas,
+        "filas_esperadas": _jsonable(resultado.filas_esperadas),
         "columnas_obtenidas": resultado.columnas_obtenidas,
-        "filas_obtenidas": resultado.filas_obtenidas,
+        "filas_obtenidas": _jsonable(resultado.filas_obtenidas),
     })
 
 
