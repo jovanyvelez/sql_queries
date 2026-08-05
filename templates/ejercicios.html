@@ -93,8 +93,24 @@
         border-radius: 4px; margin-left: 0.5rem;
     }
     .estado-resuelto { background: #04260e; color: #3fb950; }
-    .cm-ejercicio { max-height: 120px; border: 1px solid #30363d; border-radius: 6px; }
-    .cm-ejercicio.cm-focused { border-color: #58a6ff; }
+
+    .ejercicio-acciones { margin-top: 0.85rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn-consola {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: #238636; color: white; text-decoration: none;
+        padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.88rem; font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .btn-consola:hover { background: #2ea043; }
+    .btn-tablas {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: #21262d; color: #e6edf3; text-decoration: none;
+        padding: 0.5rem 0.9rem; border-radius: 6px; font-size: 0.85rem;
+        border: 1px solid #30363d;
+    }
+    .btn-tablas:hover { background: #30363d; }
+    .consola-tip { margin-top: 0.6rem; font-size: 0.8rem; color: #8b949e; line-height: 1.5; }
+    .consola-tip code { background: #0d1117; padding: 0.1rem 0.35rem; border-radius: 3px; border: 1px solid #30363d; color: #79c0ff; }
 </style>
 {% endblock %}
 {% block content %}
@@ -103,50 +119,38 @@
 <div class="ejercicios-barra">
     <p>
         {{ ejercicios | length }} ejercicios para practicar.
-        Escribe cada consulta en su caja y pulsa <strong>Probar mi SQL</strong>.
-        También puedes usar la <a href="/consola">consola SQL</a>.
+        Leé el enunciado y escribí tu consulta en la <a href="/consola">consola SQL</a>
+        (esquema <code>public</code>). Las soluciones están en el
+        <code>CHEATSHEET.md</code> del repo.
     </p>
-    <a href="/ejercicios/clase{{ clase_num }}/respuestas" class="boton-barra">
-        Ver hoja de respuestas
+    <a href="/consola" class="boton-barra">
+        Abrir consola SQL →
     </a>
 </div>
 
 {% for e in ejercicios %}
-<div class="card card-{{ e.dificultad }}" id="{{ e.id }}" data-orden-importa="{{ e.orden_importa }}">
+<div class="card card-{{ e.dificultad }}" id="{{ e.id }}">
     <div class="ejercicio-card">
-        <h3>{{ e.numero }}. {{ e.titulo }}
-            <span class="ejercicio-estado" data-estado-id="{{ e.id }}" hidden></span>
-        </h3>
+        <h3>{{ e.numero }}. {{ e.titulo }}</h3>
         <span class="badge badge-{{ e.dificultad }}">{{ e.dificultad }}</span>
     </div>
     <p class="ejercicio-enunciado">{{ e.enunciado }}</p>
-
-    <details class="ejercicio-solucion" data-ejercicio-id="{{ e.id }}">
-        <summary>Tu solución ▾</summary>
-        <div class="solucion-editor-wrapper">
-            <textarea class="solucion-textarea" data-ejercicio-id="{{ e.id }}"
-                placeholder="Escribe aqui tu consulta SQL…"></textarea>
-        </div>
-        <div class="solucion-acciones">
-            <button type="button" class="btn-probar" data-ejercicio-id="{{ e.id }}">Probar mi SQL</button>
-            <button type="button" class="btn-pista" data-ejercicio-id="{{ e.id }}">Ver pista</button>
-        </div>
-        <div class="solucion-feedback" data-feedback-id="{{ e.id }}" hidden></div>
-        <pre class="pista-cuerpo" data-pista-id="{{ e.id }}" hidden>{{ e.sql }}</pre>
-    </details>
+    <div class="ejercicio-acciones">
+        <a class="btn-consola" target="_blank" rel="noopener"
+           href="/consola?esquema=public">
+            ▶ Hacerlo en la consola SQL
+        </a>
+        <a class="btn-tablas" href="/tablas" target="_blank" rel="noopener">
+            Ver tablas del curso
+        </a>
+    </div>
+    <p class="consola-tip">
+        En la consola dejá el esquema <code>public</code> (curso) seleccionado.
+    </p>
 </div>
 {% endfor %}
 
 <div class="boton-centro">
-    <a href="/ejercicios/clase{{ clase_num }}/respuestas" class="boton-secundario">
-        Ver hoja de respuestas
-    </a>
+    <a href="/consola" class="boton-secundario">Abrir consola SQL →</a>
 </div>
-{% endblock %}
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/dracula.min.css">
-<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/sql/sql.min.js"></script>
-<script src="/static/ejercicios.js"></script>
 {% endblock %}

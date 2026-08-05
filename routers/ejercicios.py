@@ -50,37 +50,11 @@ async def ejercicios_c0(request: Request):
     )
 
 
-@router.get("/clase0/respuestas", response_class=HTMLResponse)
-async def respuestas_c0(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "respuestas.html",
-        {
-            "clase_num": 0,
-            "clase_titulo": "Consultas",
-            "ejercicios": ejercicios_clase0(),
-        },
-    )
-
-
 @router.get("/clase1", response_class=HTMLResponse)
 async def ejercicios_c1(request: Request):
     return templates.TemplateResponse(
         request,
         "ejercicios.html",
-        {
-            "clase_num": 1,
-            "clase_titulo": "Relaciones",
-            "ejercicios": ejercicios_clase1(),
-        },
-    )
-
-
-@router.get("/clase1/respuestas", response_class=HTMLResponse)
-async def respuestas_c1(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "respuestas.html",
         {
             "clase_num": 1,
             "clase_titulo": "Relaciones",
