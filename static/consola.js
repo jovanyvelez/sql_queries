@@ -16,6 +16,7 @@
         indentWithTabs: true,
         indentUnit: 2,
         smartIndent: true,
+        placeholder: "SELECT titulo, autor FROM lista_larga LIMIT 10  —  sin punto y coma (;) al final",
         extraKeys: {
             "Ctrl-Enter": ejecutar,
             "Cmd-Enter": ejecutar,
