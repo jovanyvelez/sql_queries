@@ -80,12 +80,90 @@
         background: #161b22; color: #79c0ff; padding: 0.18rem 0.5rem;
         border-radius: 4px; border: 1px solid #30363d; font-size: 0.8rem;
     }
+
+    /* Caja explicativa "¿Qué es un esquema?" colapsable */
+    .esquema-info {
+        margin-bottom: 1.25rem; background: rgba(88,166,255,0.05);
+        border: 1px solid rgba(88,166,255,0.25); border-left: 3px solid #58a6ff;
+        border-radius: 0 8px 8px 0; overflow: hidden;
+    }
+    .esquema-info > summary {
+        cursor: pointer; padding: 0.75rem 1.1rem; font-size: 0.9rem; color: #58a6ff;
+        font-weight: 600; list-style: none; user-select: none;
+        display: flex; align-items: center; gap: 0.4rem;
+    }
+    .esquema-info > summary::-webkit-details-marker { display: none; }
+    .esquema-info > summary::after { content: "▾"; margin-left: auto; transition: transform 0.2s; }
+    .esquema-info[open] > summary::after { transform: rotate(180deg); }
+    .esquema-info-body {
+        padding: 0 1.1rem 1rem; font-size: 0.88rem; color: #c9d1d9; line-height: 1.6;
+    }
+    .esquema-info-body p { margin: 0 0 0.6rem; }
+    .esquema-info-body p:last-child { margin-bottom: 0; }
+    .esquema-info-body strong { color: #e6edf3; }
+    .esquema-info-body code {
+        background: #0d1117; color: #79c0ff; padding: 0.1rem 0.4rem;
+        border-radius: 4px; border: 1px solid #30363d; font-size: 0.82rem;
+    }
+    .esquema-info-body .analogia {
+        background: #0d1117; border: 1px solid #30363d; border-radius: 6px;
+        padding: 0.75rem 1rem; margin: 0.75rem 0; font-size: 0.85rem;
+    }
+    .esquema-info-body .analogia strong { color: #d2a8ff; }
+    .esquema-info-body ul { margin: 0.4rem 0 0.6rem; padding-left: 1.25rem; }
+    .esquema-info-body ul li { margin-bottom: 0.35rem; }
+    .esquema-info-body .destacado {
+        background: rgba(63,185,80,0.08); border: 1px solid rgba(63,185,80,0.3);
+        border-radius: 6px; padding: 0.6rem 0.85rem; margin-top: 0.75rem;
+        font-size: 0.85rem; color: #3fb950;
+    }
 </style>
 {% endblock %}
 {% block content %}
 <div class="consola-layout">
     <h1>Consola SQL Interactiva</h1>
     <p>Escribe y ejecuta consultas SQL directamente contra la base de datos. Los resultados se limitan a 50 filas. Usa el selector de esquema para practicar con las tablas de los Problem Sets.</p>
+
+    <details class="esquema-info" id="esquema-info">
+        <summary>¿Qué es un esquema y por qué tengo que elegir uno? No te preocupes, es más simple de lo que suena</summary>
+        <div class="esquema-info-body">
+            <p>
+                Un <strong>esquema</strong> es, básicamente, una carpeta dentro de la base de
+                datos que agrupa tablas relacionadas. En este curso hay <strong>4 carpetas</strong>:
+            </p>
+            <div class="analogia">
+                <strong>Imaginalo como salones de un colegio.</strong><br>
+                Cada Problem Set tiene su propio salón con sus propias tablas adentro.
+                El selector de <code>Esquema</code> de arriba le dice a la consola en qué salón
+                buscar. Tú solo escribes el nombre de la tabla — <code>SELECT * FROM schools</code> —
+                y la consola sabe en qué salón mirar.
+            </div>
+            <ul>
+                <li><code>public</code> — las tablas del <strong>curso</strong> (<code>libros</code>, <code>autores</code>, <code>puntuaciones</code>…). Si estás haciendo los ejercicios de la Clase 0 o Clase 1, deja este.</li>
+                <li><code>dese</code> — las tablas del Problem Set <strong>DESE</strong> (<code>districts</code>, <code>schools</code>, <code>graduation_rates</code>…). Si te tocó DESE, selecciona este.</li>
+                <li><code>moneyball</code> — las tablas del Problem Set <strong>Moneyball</strong> (<code>players</code>, <code>teams</code>, <code>salaries</code>…). Si te tocó Moneyball, selecciona este.</li>
+                <li><code>packages</code> — las tablas del Problem Set <strong>Packages, Please</strong> (<code>addresses</code>, <code>packages</code>, <code>scans</code>…). Si te tocó Packages, selecciona este.</li>
+            </ul>
+            <p>
+                <strong>¿Por qué existen los esquemas?</strong> Porque tres Problem Sets distintos
+                pueden tener una tabla que se llame igual (por ejemplo, en otro curso podría haber
+                un <code>schools</code> distinto). Los esquemas evitan que se pisen entre sí.
+                Así cada práctica vive en su propio salón, ordenadito.
+            </p>
+            <p>
+                <strong>¿Qué tenés que hacer vos?</strong> Casi nada:
+            </p>
+            <ul>
+                <li>Elegí el esquema que te tocó en el selector de arriba (es un solo click).</li>
+                <li>Escribí tu <code>SELECT</code> normal, sin pensar en el esquema. Escribí <code>FROM schools</code>, no <code>FROM dese.schools</code>.</li>
+                <li>¡Listo! La consola se encarga del resto.</li>
+            </ul>
+            <div class="destacado">
+                ✅ En resumen: un esquema es solo una carpeta. Elegí la tuya en el selector
+                y concentrate en tu consulta. No tenés que hacer nada más.
+            </div>
+        </div>
+    </details>
 
     <div class="card">
         <div class="card-header"><h3>Consulta</h3></div>
