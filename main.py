@@ -14,7 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from routers import clases, consola, ejercicios, psets
+from routers import clases, consola, ejercicios, proyecto_final, psets
 from services.keep_alive import mantener_base_de_datos_viva
 from templating import templates
 
@@ -35,6 +35,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(clases.router, prefix="/clases")
 app.include_router(ejercicios.router, prefix="/ejercicios")
 app.include_router(psets.router)
+app.include_router(proyecto_final.router)
 app.include_router(consola.router)
 
 
