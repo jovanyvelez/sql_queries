@@ -63,14 +63,32 @@
     }
 
     // --- Dropdowns del nav en móvil (toggle al click) -----------------------
+    function esMovil() {
+        var hamburger = document.querySelector(".hamburger");
+        return hamburger && getComputedStyle(hamburger).display !== "none";
+    }
+
+    function cerrarDropdowns(excepto) {
+        document.querySelectorAll(".nav-dropdown.open").forEach(function (dd) {
+            if (dd !== excepto) dd.classList.remove("open");
+        });
+    }
+
     document.querySelectorAll(".nav-dropdown-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
-            // Solo activar el toggle en móvil (cuando el hamburger es visible)
-            var hamburger = document.querySelector(".hamburger");
-            if (hamburger && getComputedStyle(hamburger).display !== "none") {
-                var dd = btn.closest(".nav-dropdown");
-                if (dd) dd.classList.toggle("open");
-            }
+            if (!esMovil()) return; // en desktop el hover lo maneja
+            var dd = btn.closest(".nav-dropdown");
+            if (!dd) return;
+            var estabaAbierto = dd.classList.contains("open");
+            cerrarDropdowns(dd);
+            if (!estabaAbierto) dd.classList.add("open");
         });
+    });
+
+    // Cerrar dropdowns al hacer click fuera del nav (móvil y desktop táctil)
+    document.addEventListener("click", function (e) {
+        if (esMovil() && !e.target.closest(".nav-dropdown")) {
+            cerrarDropdowns(null);
+        }
     });
 })();

@@ -54,6 +54,18 @@ nav .nav-links {
     gap: 0.25rem;
 }
 
+.nav-dropdown-btn::after {
+    content: "▾";
+    font-size: 0.7rem;
+    color: #6e7681;
+    transition: transform 0.2s;
+}
+
+.nav-dropdown:hover .nav-dropdown-btn::after,
+.nav-dropdown:focus-within .nav-dropdown-btn::after {
+    transform: rotate(180deg);
+}
+
 .nav-dropdown-btn:hover {
     color: #e6edf3;
     background: rgba(255, 255, 255, 0.05);

@@ -16,14 +16,14 @@
             </button>
             <div class="nav-links" id="nav-links-main">
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-btn" type="button">Aprender ▾</button>
+                    <button class="nav-dropdown-btn" type="button">Aprender</button>
                     <div class="nav-dropdown-menu">
                         <a href="/clases/consultas"{% if request.url.path.startswith('/clases/consultas') %} aria-current="page"{% endif %}>Consultas (Clase 0)</a>
                         <a href="/clases/relaciones"{% if request.url.path.startswith('/clases/relaciones') %} aria-current="page"{% endif %}>Relaciones (Clase 1)</a>
                     </div>
                 </div>
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-btn" type="button">Practicar ▾</button>
+                    <button class="nav-dropdown-btn" type="button">Practicar</button>
                     <div class="nav-dropdown-menu">
                         <a href="/psets"{% if request.url.path.startswith('/psets') %} aria-current="page"{% endif %}>Problem Sets</a>
                         <a href="/ejercicios/clase0"{% if request.url.path.startswith('/ejercicios/clase0') %} aria-current="page"{% endif %}>Ejercicios de Queries</a>
@@ -31,7 +31,7 @@
                     </div>
                 </div>
                 <div class="nav-dropdown">
-                    <button class="nav-dropdown-btn" type="button">Herramientas ▾</button>
+                    <button class="nav-dropdown-btn" type="button">Herramientas</button>
                     <div class="nav-dropdown-menu">
                         <a href="/consola"{% if request.url.path == '/consola' %} aria-current="page"{% endif %}>Consola SQL</a>
                         <a href="/tablas"{% if request.url.path == '/tablas' %} aria-current="page"{% endif %}>Tablas</a>
