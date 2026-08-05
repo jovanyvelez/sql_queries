@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Cheatsheet SQL — Referencia rápida{% endblock %}
+{% block extra_css %}
+<style>
+    .cheat-hero {
+        background: radial-gradient(700px 280px at 80% -10%, rgba(63,185,80,0.10), transparent 70%), #161b22;
+        border: 1px solid #30363d; border-radius: 14px; padding: 1.75rem; margin-bottom: 1.75rem;
+    }
+    .cheat-hero h1 { margin: 0 0 0.4rem; font-size: 1.7rem; border: none; padding: 0; }
+    .cheat-hero p { margin: 0; color: #8b949e; line-height: 1.55; max-width: 720px; }
+
+    .cheat-section {
+        margin-bottom: 2rem; background: #161b22; border: 1px solid #30363d;
+        border-radius: 12px; overflow: hidden;
+    }
+    .cheat-section > h2 {
+        margin: 0; padding: 0.85rem 1.25rem; font-size: 1.05rem; color: #e6edf3;
+        background: #21262d; border-bottom: 1px solid #30363d;
+    }
+    .cheat-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .cheat-table th {
+        background: #0d1117; color: #8b949e; padding: 0.45rem 0.85rem;
+        text-align: left; font-weight: 600; font-size: 0.78rem;
+        text-transform: uppercase; letter-spacing: 0.04em; border-bottom: 1px solid #21262d;
+    }
+    .cheat-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid #21262d; color: #c9d1d9; vertical-align: top; }
+    .cheat-table tr:last-child td { border-bottom: none; }
+    .cheat-table tr:hover td { background: #1c2128; }
+    .cheat-table code, .cheat-table pre {
+        font-family: "Consolas", "Monaco", "Courier New", monospace;
+        background: #0d1117; color: #79c0ff; padding: 0.15rem 0.4rem;
+        border-radius: 4px; font-size: 0.82rem; border: 1px solid #30363d;
+    }
+    .cheat-table pre { display: inline-block; padding: 0.3rem 0.55rem; color: #a5d6ff; white-space: pre-wrap; max-width: 100%; }
+    .cheat-table .col-concepto code { color: #d2a8ff; }
+    .cheat-table .col-nota { color: #8b949e; font-size: 0.82rem; }
+
+    .nav-secciones {
+        display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.75rem;
+        position: sticky; top: 0; z-index: 10; padding: 0.75rem 0;
+        background: rgba(13,17,23,0.92); backdrop-filter: blur(6px);
+        border-bottom: 1px solid #21262d;
+    }
+    .nav-secciones a {
+        font-size: 0.8rem; padding: 0.3rem 0.7rem; border-radius: 6px;
+        text-decoration: none; color: #8b949e; background: #161b22;
+        border: 1px solid #30363d; transition: all 0.15s;
+    }
+    .nav-secciones a:hover { color: #e6edf3; border-color: #58a6ff; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="cheat-hero">
+    <h1>Cheatsheet SQL — Referencia rápida</h1>
+    <p>
+        Sintaxis y ejemplos cortos de los conceptos clave de SQL que vimos en el
+        curso: SELECT, WHERE, JOIN, GROUP BY, subconsultas y conjuntos. Usalo
+        para repasar antes de un examen o mientras hacés un ejercicio en la
+        <a href="/consola" style="color:#58a6ff">consola SQL</a>.
+    </p>
+</div>
+
+<div class="nav-secciones">
+    {% for categoria in cheatsheet.keys() %}
+    <a href="#{{ categoria | replace(' ', '-') | replace('(', '') | replace(')', '') | lower }}">{{ categoria }}</a>
+    {% endfor %}
+</div>
+
+{% for categoria, filas in cheatsheet.items() %}
+<div class="cheat-section" id="{{ categoria | replace(' ', '-') | replace('(', '') | replace(')', '') | lower }}">
+    <h2>{{ categoria }}</h2>
+    <div style="overflow-x:auto">
+        <table class="cheat-table">
+            <thead>
+                <tr>
+                    <th>Concepto</th>
+                    <th>Sintaxis</th>
+                    <th>Ejemplo</th>
+                    <th>Nota</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in filas %}
+                <tr>
+                    <td class="col-concepto"><code>{{ f.concepto }}</code></td>
+                    <td><code>{{ f.sintaxis }}</code></td>
+                    <td><pre>{{ f.ejemplo }}</pre></td>
+                    <td class="col-nota">{{ f.nota }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+
+<div style="text-align:center; margin-top:2rem">
+    <a href="/consola" class="btn-ghost" style="display:inline-block; text-decoration:none; color:#58a6ff; padding:0.6rem 1.2rem; border:1px solid rgba(88,166,255,0.3); border-radius:8px; background:rgba(88,166,255,0.05)">
+        Abrir consola SQL para practicar →
+    </a>
+</div>
+{% endblock %}
