@@ -170,7 +170,7 @@
         <div class="card-body">
             <form id="form-consola" method="post" action="/consulta">
                 <div id="cm-host">
-                    <textarea name="sql" id="sql-textarea" placeholder="SELECT titulo, autor FROM lista_larga LIMIT 10;">{{ sql_anterior or '' }}</textarea>
+                    <textarea name="sql" id="sql-textarea" placeholder="SELECT titulo, autor FROM lista_larga LIMIT 10 — sin punto y coma al final">{{ sql_anterior or '' }}</textarea>
                 </div>
                 <div class="consola-toolbar">
                     <button type="submit" id="btn-ejecutar">Ejecutar (Ctrl+Enter)</button>
