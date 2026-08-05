@@ -29,6 +29,7 @@ Aplicacion web educativa que adapta el curso **CS50's Introduction to Databases 
 - [Sistema de plantillas Jinja2](#sistema-de-plantillas-jinja2)
 - [Conversion de Markdown a HTML](#conversion-de-markdown-a-html)
 - [Ejercicios y sistema de auto-evaluacion](#ejercicios-y-sistema-de-auto-evaluacion)
+  - [Problem Sets (psets) — Relaciones de tablas](#problem-sets-psets--relaciones-de-tablas)
 - [Patrones de diseno usados](#patrones-de-diseno-usados)
 - [Estructura completa del proyecto](#estructura-completa-del-proyecto)
 - [Creditos](#creditos)
@@ -763,6 +764,31 @@ Los ejercicios se muestran de dos formas:
 2. **Página de ejercicios clásica** (`/ejercicios/clase0`, `/clase1`): listado completo con cards, badges de dificultad y enlaces a la hoja de respuestas.
 
 Las hojas de respuestas (`/ejercicios/clase0/respuestas`, `/clase1/respuestas`) muestran el enunciado seguido de la **consulta SQL solucion** en un bloque `<pre>` con botón copiar. Incluyen una advertencia amarilla animando al estudiante a intentar resolver el ejercicio por su cuenta antes de mirar la respuesta.
+
+### Problem Sets (psets) — Relaciones de tablas
+
+Aparte de los cursos, el sitio incluye **3 Problem Sets de Harvard CS50** (Week 1 — Relating) traducidos al español para jóvenes de Medellín, pensados para asignarse en clase de forma aleatoria y complementar el tema de relaciones de tablas:
+
+| Pset | Slug | Esquema PostgreSQL | Ejercicios | Tema |
+|---|---|---|---|---|
+| DESE — Educación en Massachusetts | `dese` | `dese` | 13 | JOIN, GROUP BY, subconsultas sobre escuelas, distritos y graduaciones |
+| Moneyball — Béisbol y estadísticas | `moneyball` | `moneyball` | 12 | JOIN, agregaciones, subconsultas anidadas sobre jugadores y salarios MLB |
+| Packages, Please — Paquetes perdidos | `packages` | `packages` | 3 | Misterios de rastreo de paquetes con JOINs y subconsultas |
+
+- **Enunciados traducidos al español paisa** de forma fiel al original, con links al enunciado original de Harvard y a la descarga del ZIP original (`dese.zip`, `moneyball.zip`, `packages.zip`).
+- **Cada pset vive en su propio esquema PostgreSQL** (`dese`, `moneyball`, `packages`), separado del esquema `public` del curso. El validador aplica `SET search_path TO <esquema>, public` antes de ejecutar la consulta del estudiante, así las consultas funcionan sin qualificar el esquema (p.ej. `FROM schools` en un ejercicio de DESE).
+- **Migración SQLite → PostgreSQL**: el script `migrar_psets.py` vuelca los 3 archivos `.db` originales a sus esquemas correspondientes. Es idempotente (con `--force` recrea las tablas).
+  ```bash
+  # Descargar los ZIP de Harvard y descomprimirlos en psets_data/
+  mkdir -p psets_data
+  for z in dese moneyball packages; do
+      wget https://cdn.cs50.net/sql/2024/x/psets/1/$z.zip
+      unzip $z.zip -d psets_data/
+  done
+  # Migrar a PostgreSQL (usa DATABASE_URL del .env)
+  python migrar_psets.py
+  ```
+- **Rutas**: `/psets` (índice con las 3 tarjetas) y `/psets/{slug}` (página del pset con sus ejercicios validables).
 
 ---
 

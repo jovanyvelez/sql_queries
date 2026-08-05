@@ -2,3 +2,5 @@
 .venv/
 __pycache__/
 *.pyc
+# Bases SQLite descargadas de Harvard (se migran a PostgreSQL con migrar_psets.py)
+psets_data/

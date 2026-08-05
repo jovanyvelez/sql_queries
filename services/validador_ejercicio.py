@@ -30,6 +30,7 @@ async def probar_ejercicio(
     sql_esperado: str,
     orden_importa: bool,
     limite: int = 200,
+    esquema: str = "public",
 ) -> ResultadoEjercicio:
     """Ejecuta ambas consultas en una transacción READ ONLY y compara resultados.
 
@@ -37,6 +38,8 @@ async def probar_ejercicio(
     - Comparación de filas: si orden_importa, comparación estricta en orden.
       Si no, comparación como multiconjunto (sorted) ignorando el orden de filas.
     - Se limita a `limite` filas por consulta para evitar resultados enormes.
+    - `esquema`: si no es 'public', hace SET search_path TO <esquema>, public antes
+      de ejecutar las consultas, para aislar las tablas de cada pset.
     """
     try:
         consulta_usuario = validar_consulta(sql_usuario)
@@ -72,6 +75,8 @@ async def probar_ejercicio(
 
     async with db.begin() as tx:
         await db.execute(text("SET TRANSACTION READ ONLY"))
+        if esquema and esquema != "public":
+            await db.execute(text(f'SET search_path TO "{esquema}", public'))
 
         try:
             res_usuario = await db.execute(text(consulta_usuario))

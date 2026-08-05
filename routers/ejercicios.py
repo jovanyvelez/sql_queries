@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
 from services.clase0_ejercicios import ejercicios_clase0
 from services.clase1_ejercicios import ejercicios_clase1
+from services.psets import ejercicio_por_id, todos_los_psets
 from services.validador_ejercicio import probar_ejercicio
 from templating import templates
 
@@ -17,6 +18,9 @@ def _todos_los_ejercicios() -> dict[str, object]:
         out[e.id] = e
     for e in ejercicios_clase1():
         out[e.id] = e
+    for lista in todos_los_psets().values():
+        for e in lista:
+            out[e.id] = e
     return out
 
 
@@ -104,6 +108,7 @@ async def probar_ejercicio_endpoint(
         sql_usuario=sql_usuario,
         sql_esperado=ejercicio.sql,
         orden_importa=ejercicio.orden_importa,
+        esquema=ejercicio.esquema,
     )
 
     return JSONResponse({
