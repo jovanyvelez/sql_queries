@@ -31,6 +31,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CS50 SQL — Adaptacion a PostgreSQL", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/public", StaticFiles(directory="public"), name="public")
 
 app.include_router(clases.router, prefix="/clases")
 app.include_router(ejercicios.router, prefix="/ejercicios")
