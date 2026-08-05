@@ -1051,7 +1051,7 @@ nav a[aria-current="page"]:hover {
         background: rgba(255, 255, 255, 0.05);
     }
 
-    /* En móvil, los dropdowns se despliegan como lista plana */
+    /* En móvil, los dropdowns son colapsables (click para abrir/cerrar) */
     .nav-dropdown {
         width: 100%;
     }
@@ -1061,15 +1061,29 @@ nav a[aria-current="page"]:hover {
         padding: 0.7rem 1rem;
         border-radius: 0;
         font-size: 0.95rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .nav-dropdown-btn::after {
+        content: "▸";
+        transition: transform 0.2s;
+        font-size: 0.75rem;
+    }
+    .nav-dropdown.open .nav-dropdown-btn::after {
+        transform: rotate(90deg);
     }
     .nav-dropdown-menu {
         position: static;
-        display: flex;
+        display: none;
         box-shadow: none;
         border: none;
         border-radius: 0;
         padding: 0;
         background: rgba(0, 0, 0, 0.2);
+    }
+    .nav-dropdown.open .nav-dropdown-menu {
+        display: flex;
     }
     .nav-dropdown-menu a {
         padding: 0.6rem 1rem 0.6rem 2rem;

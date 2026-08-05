@@ -61,4 +61,16 @@
     if (window.Prism && typeof window.Prism.highlightAll === "function") {
         window.Prism.highlightAll();
     }
+
+    // --- Dropdowns del nav en móvil (toggle al click) -----------------------
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            // Solo activar el toggle en móvil (cuando el hamburger es visible)
+            var hamburger = document.querySelector(".hamburger");
+            if (hamburger && getComputedStyle(hamburger).display !== "none") {
+                var dd = btn.closest(".nav-dropdown");
+                if (dd) dd.classList.toggle("open");
+            }
+        });
+    });
 })();
