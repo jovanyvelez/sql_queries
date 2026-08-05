@@ -17,6 +17,7 @@
     }
     .tablas-count { color: #8b949e; font-size: 0.85rem; }
     .tabla-card.hidden { display: none; }
+    .grupo-tablas.hidden { display: none; }
 
     /* controles globales */
     .tablas-controles { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
@@ -122,33 +123,43 @@
         font-size: 0.78rem; color: #8b949e;
     }
     .leyenda span { display: inline-flex; align-items: center; gap: 0.3rem; }
+
+    /* Secciones por grupo */
+    .grupo-tablas {
+        margin-bottom: 2.5rem; padding: 1.25rem 1.5rem;
+        background: #161b22; border: 1px solid #30363d; border-radius: 14px;
+    }
+    .grupo-tablas.grupo-pset {
+        background: linear-gradient(180deg, rgba(210,168,255,0.04), #161b22 40%);
+        border-color: rgba(210,168,255,0.25);
+    }
+    .grupo-header h2 {
+        margin: 0 0 0.4rem; font-size: 1.25rem; border: none; padding: 0;
+        display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    }
+    .grupo-pill {
+        font-size: 0.72rem; padding: 0.15rem 0.6rem; border-radius: 999px;
+        background: #0d1117; border: 1px solid #30363d; color: #8b949e;
+        font-weight: 600;
+    }
+    .grupo-pill.pset { color: #d2a8ff; border-color: rgba(210,168,255,0.4); background: rgba(210,168,255,0.08); }
+    .grupo-pill.esquema-pill { font-family: monospace; color: #79c0ff; }
+    .grupo-pill.esquema-pill code { background: transparent; color: #79c0ff; padding: 0; }
+    .grupo-desc { margin: 0 0 0.6rem; color: #8b949e; font-size: 0.88rem; line-height: 1.55; max-width: 720px; }
+    .grupo-link { margin: 0 0 0.5rem; font-size: 0.88rem; }
+    .grupo-link a { color: #d2a8ff; text-decoration: none; }
+    .grupo-link a:hover { text-decoration: underline; }
 </style>
 {% endblock %}
 {% block content %}
-<h1>Esquema de la base de datos <code>sql_teach</code></h1>
+<h1>Esquema de las bases de datos</h1>
 
 <p class="intro">
     Estructura de cada tabla: columnas, tipos de dato, claves (PK/FK),
     si admiten <code>NULL</code> y sus valores por defecto. Los conteos
-    se leen en vivo desde PostgreSQL.
+    se leen en vivo desde PostgreSQL. Las tablas del curso están separadas
+    de las tablas de los <strong>Problem Sets</strong> (actividades).
 </p>
-
-{% if relaciones %}
-<details class="er-diagram" open>
-    <summary>Diagrama Entidad-Relación</summary>
-    <div class="er-diagram-body">
-        <div class="mermaid">
-erDiagram
-{% for nombre, columnas in tablas.items() %}{{ nombre }} {
-{% for col in columnas %}    {{ col.tipo }} {{ col.columna }}
-{% endfor %}
-}
-{% endfor %}{% for r in relaciones %}{{ r.origen_tabla }} }o--|| {{ r.destino_tabla }} : "{{ r.origen_col }}→{{ r.destino_col }}"
-{% endfor %}
-        </div>
-    </div>
-</details>
-{% endif %}
 
 <div class="leyenda">
     <span><span class="badge-clave badge-pk">PK</span> Clave primaria</span>
@@ -161,57 +172,93 @@ erDiagram
     <span id="tablas-count" class="tablas-count"></span>
 </div>
 
-<div class="chips-nav" id="chips-nav">
-    {% for nombre, columnas in tablas.items() %}
-    <a class="chip" data-chip="{{ nombre|lower }}" href="#tabla-{{ nombre }}">{{ nombre }}</a>
-    {% endfor %}
-</div>
-
 <div class="tablas-controles">
     <button type="button" class="btn-toggle" id="btn-expandir-todo">Expandir todo</button>
     <button type="button" class="btn-toggle" id="btn-contraer-todo">Contraer todo</button>
 </div>
 
-{% for nombre, columnas in tablas.items() %}
-<div class="card tabla-card" id="tabla-{{ nombre }}" data-tabla="{{ nombre|lower }}">
-    <div class="card-header" role="button" tabindex="0" aria-expanded="false" data-toggle>
-        <h3><span class="chevron">▸</span>{{ nombre }}</h3>
-        <div class="tabla-meta">
-            <span class="meta-pill rows">{{ "{:,}".format(conteos.get(nombre, -1)).replace(",", ".") if conteos.get(nombre, -1) >= 0 else "—" }} filas</span>
-            <span class="meta-pill">{{ columnas | length }} columnas</span>
+{% for grupo in grupos %}
+<section class="grupo-tablas grupo-{{ 'pset' if grupo.es_pset else 'curso' }}" data-grupo="{{ grupo.id }}">
+    <div class="grupo-header">
+        <h2>{{ grupo.titulo }}
+            <span class="grupo-pill">{{ grupo.tablas | length }} tablas</span>
+            {% if grupo.es_pset %}<span class="grupo-pill pset">Problem Set</span>{% endif %}
+            <span class="grupo-pill esquema-pill">Esquema <code>{{ grupo.esquema }}</code></span>
+        </h2>
+        <p class="grupo-desc">{{ grupo.descripcion }}</p>
+        {% if grupo.es_pset %}
+        <p class="grupo-link">
+            <a href="/psets/{{ grupo.esquema }}">Ver el enunciado y los ejercicios de este pset →</a>
+        </p>
+        {% endif %}
+    </div>
+
+    {% if grupo.relaciones %}
+    <details class="er-diagram">
+        <summary>Diagrama Entidad-Relación — {{ grupo.titulo }}</summary>
+        <div class="er-diagram-body">
+            <div class="mermaid">
+erDiagram
+{% for nombre, columnas in grupo.tablas.items() %}{{ nombre | replace(".", "_") }} {
+{% for col in columnas %}    {{ col.tipo }} {{ col.columna }}
+{% endfor %}
+}
+{% endfor %}{% for r in grupo.relaciones %}{{ r.origen_tabla | replace(".", "_") }} }o--|| {{ r.destino_tabla | replace(".", "_") }} : "{{ r.origen_col }}→{{ r.destino_col }}"
+{% endfor %}
+            </div>
+        </div>
+    </details>
+    {% endif %}
+
+    <div class="chips-nav" id="chips-{{ grupo.id }}">
+        {% for nombre, columnas in grupo.tablas.items() %}
+        <a class="chip" data-chip="{{ nombre|lower }}" href="#tabla-{{ grupo.id }}-{{ nombre|replace('.', '_') }}">{{ nombre }}</a>
+        {% endfor %}
+    </div>
+
+    {% for nombre, columnas in grupo.tablas.items() %}
+    <div class="card tabla-card" id="tabla-{{ grupo.id }}-{{ nombre|replace('.', '_') }}"
+         data-tabla="{{ nombre|lower }}" data-grupo-id="{{ grupo.id }}">
+        <div class="card-header" role="button" tabindex="0" aria-expanded="false" data-toggle>
+            <h3><span class="chevron">▸</span>{{ nombre }}</h3>
+            <div class="tabla-meta">
+                <span class="meta-pill rows">{{ "{:,}".format(grupo.conteos.get(nombre, -1)).replace(",", ".") if grupo.conteos.get(nombre, -1) >= 0 else "—" }} filas</span>
+                <span class="meta-pill">{{ columnas | length }} columnas</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Columna</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">¿NULL?</th>
+                        <th scope="col">Por defecto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in columnas %}
+                    <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
+                        <td class="col-name" data-copy="{{ nombre }}.{{ col.columna }}" scope="row">
+                            <span class="col-label">{{ col.columna }}</span>
+                            {% if col.es_pk %}<span class="badge-clave badge-pk" title="Clave primaria">PK</span>{% endif %}
+                            {% if col.fk_ref %}<span class="badge-clave badge-fk" title="Clave foránea → {{ col.fk_ref }}">FK</span>{% endif %}
+                            <span class="copy-hint">copiar</span>
+                        </td>
+                        <td class="col-type"><code>{{ col.tipo }}</code></td>
+                        <td>{{ col.nulo }}</td>
+                        <td>
+                            {{ col.defecto }}
+                            {% if col.fk_ref %}<div class="fk-ref">{{ col.fk_ref }}</div>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
-    <div class="card-body">
-        <table>
-            <thead>
-                <tr>
-                    <th scope="col">Columna</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">¿NULL?</th>
-                    <th scope="col">Por defecto</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for col in columnas %}
-                <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
-                    <td class="col-name" data-copy="{{ nombre }}.{{ col.columna }}" scope="row">
-                        <span class="col-label">{{ col.columna }}</span>
-                        {% if col.es_pk %}<span class="badge-clave badge-pk" title="Clave primaria">PK</span>{% endif %}
-                        {% if col.fk_ref %}<span class="badge-clave badge-fk" title="Clave foránea → {{ col.fk_ref }}">FK</span>{% endif %}
-                        <span class="copy-hint">copiar</span>
-                    </td>
-                    <td class="col-type"><code>{{ col.tipo }}</code></td>
-                    <td>{{ col.nulo }}</td>
-                    <td>
-                        {{ col.defecto }}
-                        {% if col.fk_ref %}<div class="fk-ref">{{ col.fk_ref }}</div>{% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
+    {% endfor %}
+</section>
 {% endfor %}
 
 <script>
@@ -304,6 +351,11 @@ erDiagram
         chips.forEach(function (chip) {
             var t = chip.getAttribute("data-chip");
             chip.classList.toggle("hidden", !(!q || t.indexOf(q) !== -1));
+        });
+        // ocultar secciones (grupos) sin ninguna tabla visible
+        document.querySelectorAll(".grupo-tablas").forEach(function (sec) {
+            var algunaVisible = sec.querySelectorAll(".tabla-card:not(.hidden)").length > 0;
+            sec.classList.toggle("hidden", !algunaVisible);
         });
         if (count) count.textContent = visibles + " / " + cards.length + " tablas";
     }

@@ -45,112 +45,165 @@ async def index(request: Request):
 
 @app.get("/tablas", response_class=HTMLResponse)
 async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
-    filas = await db.execute(
-        text(
-            "SELECT table_name, column_name, data_type, is_nullable,"
-            " column_default, ordinal_position "
-            "FROM information_schema.columns "
-            "WHERE table_schema = 'public' "
-            "ORDER BY table_name, ordinal_position"
-        )
-    )
-    columnas = filas.fetchall()
+    """Lista las tablas del esquema `public` (curso) y de los esquemas de
+    Problem Sets (`dese`, `moneyball`, `packages`), agrupadas por grupo.
 
-    tablas_dict: dict[str, list[dict[str, object]]] = {}
-    for col in columnas:
-        tn = col.table_name
-        if tn not in tablas_dict:
-            tablas_dict[tn] = []
-        tablas_dict[tn].append(
-            {
-                "columna": col.column_name,
-                "tipo": col.data_type,
-                "nulo": "SI" if col.is_nullable == "YES" else "NO",
-                "defecto": str(col.column_default) if col.column_default else "—",
-                "es_pk": False,
-                "fk_ref": None,
-            }
-        )
+    Devuelve al template:
+      - grupos: lista de dicts {id, titulo, descripcion, es_pset, esquema,
+        tablas: {key_unico: [col, ...]}, relaciones, conteos}
+    Cada tabla tiene una key única global (p.ej. "schools" en public, o
+    "dese.schools" en el esquema dese) para evitar colisiones.
+    """
+    # Esquemas a consultar: (esquema, es_pset, grupo_id, titulo, descripcion)
+    esquemas = [
+        ("public", False, "curso", "Tablas del curso",
+         "Las 10 tablas del esquema público del curso CS50 SQL (Booker Prize, Goodreads, ejemplos didácticos)."),
+        ("dese", True, "pset-dese", "Problem Set — DESE",
+         "Educación en Massachusetts: distritos, escuelas, graduaciones, gastos y evaluaciones de docentes."),
+        ("moneyball", True, "pset-moneyball", "Problem Set — Moneyball",
+         "Béisbol MLB 2001: jugadores, equipos, salarios y performances."),
+        ("packages", True, "pset-packages", "Problem Set — Packages, Please",
+         "Paquetería en Boston: direcciones, paquetes, carteros y escaneos de entrega."),
+    ]
+    esquema_nombres = {e[0]: e[3].split(" — ")[1] if " — " in e[3] else e[0] for e in esquemas}
 
-    # Claves foraneas para el diagrama ER + marca por columna
-    relaciones: list[dict[str, str]] = []
-    fk_por_columna: dict[tuple[str, str], str] = {}
-    pk_por_columna: set[tuple[str, str]] = set()
-    try:
-        fks = await db.execute(
+    grupos: list[dict[str, object]] = []
+    for esquema, es_pset, grupo_id, titulo, descripcion in esquemas:
+        # Columnas de este esquema
+        filas = await db.execute(
             text(
-                """
-                SELECT
-                    kcu.table_name AS tabla_origen,
-                    kcu.column_name AS columna_origen,
-                    ccu.table_name AS tabla_destino,
-                    ccu.column_name AS columna_destino
-                FROM information_schema.table_constraints tc
-                JOIN information_schema.key_column_usage kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                JOIN information_schema.constraint_column_usage ccu
-                    ON ccu.constraint_name = tc.constraint_name
-                    AND ccu.table_schema = tc.table_schema
-                WHERE tc.constraint_type = 'FOREIGN KEY'
-                    AND tc.table_schema = 'public'
-                ORDER BY kcu.table_name, kcu.column_name
-                """
-            )
+                "SELECT table_name, column_name, data_type, is_nullable,"
+                " column_default, ordinal_position "
+                "FROM information_schema.columns "
+                "WHERE table_schema = :esq "
+                "ORDER BY table_name, ordinal_position"
+            ),
+            {"esq": esquema},
         )
-        for r in fks.fetchall():
-            relaciones.append(
+        columnas = filas.fetchall()
+
+        # key única global: nombre de tabla en public, o "esquema.tabla" en psets
+        def _key(tn: str) -> str:
+            return tn if esquema == "public" else f"{esquema}.{tn}"
+
+        tablas_dict: dict[str, list[dict[str, object]]] = {}
+        for col in columnas:
+            k = _key(col.table_name)
+            if k not in tablas_dict:
+                tablas_dict[k] = []
+            tablas_dict[k].append(
                 {
-                    "origen_tabla": r.tabla_origen,
-                    "origen_col": r.columna_origen,
-                    "destino_tabla": r.tabla_destino,
-                    "destino_col": r.columna_destino,
+                    "columna": col.column_name,
+                    "tipo": col.data_type,
+                    "nulo": "SI" if col.is_nullable == "YES" else "NO",
+                    "defecto": str(col.column_default) if col.column_default else "—",
+                    "es_pk": False,
+                    "fk_ref": None,
                 }
             )
-            fk_por_columna[(r.tabla_origen, r.columna_origen)] = (
-                f"{r.tabla_destino}.{r.columna_destino}"
-            )
 
-        pks = await db.execute(
-            text(
-                """
-                SELECT kcu.table_name, kcu.column_name
-                FROM information_schema.table_constraints tc
-                JOIN information_schema.key_column_usage kcu
-                    ON tc.constraint_name = kcu.constraint_name
-                    AND tc.table_schema = kcu.table_schema
-                WHERE tc.constraint_type = 'PRIMARY KEY'
-                    AND tc.table_schema = 'public'
-                """
-            )
-        )
-        for r in pks.fetchall():
-            pk_por_columna.add((r.table_name, r.column_name))
-    except Exception:
-        pass
+        if not tablas_dict:
+            # esquema sin tablas (p.ej. migración no ejecutada) — lo saltamos
+            continue
 
-    # Marcar PK y FK en cada columna
-    for tn, cols in tablas_dict.items():
-        for c in cols:
-            if (tn, str(c["columna"])) in pk_por_columna:
-                c["es_pk"] = True
-            ref = fk_por_columna.get((tn, str(c["columna"])))
-            if ref:
-                c["fk_ref"] = ref
-
-    # Conteo de filas por tabla
-    conteos: dict[str, int] = {}
-    for tn in tablas_dict:
+        # Claves foráneas y primarias de este esquema
+        relaciones: list[dict[str, str]] = []
+        fk_por_columna: dict[tuple[str, str], str] = {}
+        pk_por_columna: set[tuple[str, str]] = set()
         try:
-            res = await db.execute(text(f'SELECT COUNT(*) FROM "{tn}"'))
-            conteos[tn] = int(res.scalar() or 0)
+            fks = await db.execute(
+                text(
+                    """
+                    SELECT
+                        kcu.table_name AS tabla_origen,
+                        kcu.column_name AS columna_origen,
+                        ccu.table_name AS tabla_destino,
+                        ccu.column_name AS columna_destino
+                    FROM information_schema.table_constraints tc
+                    JOIN information_schema.key_column_usage kcu
+                        ON tc.constraint_name = kcu.constraint_name
+                        AND tc.table_schema = kcu.table_schema
+                    JOIN information_schema.constraint_column_usage ccu
+                        ON ccu.constraint_name = tc.constraint_name
+                        AND ccu.table_schema = tc.table_schema
+                    WHERE tc.constraint_type = 'FOREIGN KEY'
+                        AND tc.table_schema = :esq
+                    ORDER BY kcu.table_name, kcu.column_name
+                    """
+                ),
+                {"esq": esquema},
+            )
+            for r in fks.fetchall():
+                relaciones.append(
+                    {
+                        "origen_tabla": r.tabla_origen,
+                        "origen_col": r.columna_origen,
+                        "destino_tabla": r.tabla_destino,
+                        "destino_col": r.columna_destino,
+                    }
+                )
+                fk_por_columna[(r.tabla_origen, r.columna_origen)] = (
+                    f"{r.tabla_destino}.{r.columna_destino}"
+                )
+
+            pks = await db.execute(
+                text(
+                    """
+                    SELECT kcu.table_name, kcu.column_name
+                    FROM information_schema.table_constraints tc
+                    JOIN information_schema.key_column_usage kcu
+                        ON tc.constraint_name = kcu.constraint_name
+                        AND tc.table_schema = kcu.table_schema
+                    WHERE tc.constraint_type = 'PRIMARY KEY'
+                        AND tc.table_schema = :esq
+                    """
+                ),
+                {"esq": esquema},
+            )
+            for r in pks.fetchall():
+                pk_por_columna.add((r.table_name, r.column_name))
         except Exception:
-            conteos[tn] = -1
+            pass
+
+        # Marcar PK y FK en cada columna
+        for tn_key, cols in tablas_dict.items():
+            tn_real = tn_key.split(".")[-1] if "." in tn_key else tn_key
+            for c in cols:
+                if (tn_real, str(c["columna"])) in pk_por_columna:
+                    c["es_pk"] = True
+                ref = fk_por_columna.get((tn_real, str(c["columna"])))
+                if ref:
+                    c["fk_ref"] = ref
+
+        # Conteo de filas por tabla (qualifica el esquema)
+        conteos: dict[str, int] = {}
+        for tn_key in tablas_dict:
+            tn_real = tn_key.split(".")[-1] if "." in tn_key else tn_key
+            try:
+                res = await db.execute(
+                    text(f'SELECT COUNT(*) FROM "{esquema}"."{tn_real}"')
+                )
+                conteos[tn_key] = int(res.scalar() or 0)
+            except Exception:
+                conteos[tn_key] = -1
+
+        grupos.append(
+            {
+                "id": grupo_id,
+                "titulo": titulo,
+                "descripcion": descripcion,
+                "es_pset": es_pset,
+                "esquema": esquema,
+                "tablas": tablas_dict,
+                "relaciones": relaciones,
+                "conteos": conteos,
+            }
+        )
 
     return templates.TemplateResponse(
         request,
         "tablas.html",
-        {"tablas": tablas_dict, "relaciones": relaciones, "conteos": conteos},
+        {"grupos": grupos},
     )
 
 
