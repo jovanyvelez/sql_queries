@@ -32,6 +32,67 @@ nav .nav-links {
     align-items: center;
 }
 
+/* ── dropdowns del nav ──────────────────────────────── */
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-btn {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.nav-dropdown-btn:hover {
+    color: #e6edf3;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 200px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 0.35rem;
+    z-index: 200;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown:focus-within .nav-dropdown-menu {
+    display: flex;
+}
+
+.nav-dropdown-menu a {
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    white-space: nowrap;
+}
+
+.nav-dropdown-menu a[aria-current="page"] {
+    color: #58a6ff;
+    background: rgba(88, 166, 255, 0.08);
+    font-weight: 600;
+}
+
 nav a {
     color: #8b949e;
     text-decoration: none;
@@ -988,6 +1049,32 @@ nav a[aria-current="page"]:hover {
 
     nav .nav-links a:hover {
         background: rgba(255, 255, 255, 0.05);
+    }
+
+    /* En móvil, los dropdowns se despliegan como lista plana */
+    .nav-dropdown {
+        width: 100%;
+    }
+    .nav-dropdown-btn {
+        width: 100%;
+        text-align: left;
+        padding: 0.7rem 1rem;
+        border-radius: 0;
+        font-size: 0.95rem;
+    }
+    .nav-dropdown-menu {
+        position: static;
+        display: flex;
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        background: rgba(0, 0, 0, 0.2);
+    }
+    .nav-dropdown-menu a {
+        padding: 0.6rem 1rem 0.6rem 2rem;
+        border-radius: 0;
+        font-size: 0.9rem;
     }
 
     .container {
