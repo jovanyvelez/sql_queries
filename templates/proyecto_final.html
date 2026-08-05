@@ -90,58 +90,34 @@
     <span class="pf-badge">Cierre del curso</span>
     <h1>Proyecto Final</h1>
     <p>
-        El broche de oro del curso: tu oportunidad de salir a rodar con todo lo que
+        El broche de oro del curso: tu oportunidad de salir con todo lo que
         aprendiste de SQL y crear <strong>tu propia base de datos</strong>. Te pedimos
         que construyas algo que te importe, que resuelva un problema de verdad, que
-        impacte positivamente a otros o que cambie el mundo. Esforzate por crear algo
+        impacte positivamente a otros o que cambie el mundo. Esfuerzate por crear algo
         de lo que te sientas orgulloso.
     </p>
 </div>
 
 <div class="pf-advertencia">
-    <strong>Antes de empezar:</strong> leé bien todo este enunciado. Es más largo que
-    los Problem Sets porque acá <em>vos</em> diseñás la base de datos desde cero: las
-    tablas, las relaciones, los índices y las consultas. Es un reto grande, pero
-    reached for the stars 🌟 — es el momento de demostrar todo lo que sabés.
+    <strong>Antes de empezar:</strong> leé bien todo este enunciado. Acá <em>tu</em> diseñas la base de datos desde cero: las
+    tablas, las relaciones, los índices y las consultas. 🌟 — Es el momento de demostrar todo lo que sabes.
 </div>
 
 <!-- ── Trabajo en equipo ──────────────────────────────────────────── -->
 <div class="pf-section">
     <h2>¿Solo o en equipo?</h2>
     <p>
-        Como desarrollar software rara vez es trabajo de uno solo, podés colaborar con
-        uno o dos compañeros para este proyecto. Cada integrante del grupo debe
-        contribuir por igual al diseño y la implementación. Además, se espera que el
-        alcance de un grupo de dos o tres personas sea, respectivamente, el doble o el
-        triple que el de un proyecto individual. Aunque no más de tres estudiantes
-        pueden diseñar e implementar un mismo proyecto, podés pedir consejo a otros,
-        siempre y cuando respetés la política de honestidad académica del curso.
+        Como desarrollar software rara vez es trabajo de uno solo, van a trabajar en
+        el grupo que estudiantes que el profesor conforme. Cada integrante del grupo debe
+        contribuir por igual al diseño y la implementación.
     </p>
 </div>
 
 <!-- ── Ideas ──────────────────────────────────────────────────────── -->
 <div class="pf-section">
-    <h2>Ideas para arrancar</h2>
+    <h2>Sobre qué se va a trabajar?</h2>
     <p>
-        Las ideas de lo que podés construir son infinitas. Para arrancar, acá van
-        algunas que otros han intentado:
-    </p>
-    <div class="pf-ideas">
-        <div class="pf-idea">
-            <h4>🎵 Tus canciones favoritas</h4>
-            <p>Una base de datos para encontrar tus canciones preferidas: artistas, playlists, álbumes y más (estilo Spotify o Apple Music).</p>
-        </div>
-        <div class="pf-idea">
-            <h4>💰 Finanzas personales</h4>
-            <p>Una base de datos para manejar tus finanzas: saldos de cuentas, transacciones, presupuestos y más (estilo Mint o tu app del banco).</p>
-        </div>
-        <div class="pf-idea">
-            <h4>👥 Amigos en una ciudad nueva</h4>
-            <p>Una base de datos para ayudar a otros a hacer amigos cuando se mudan a una ciudad nueva: personas, ciudades, eventos, conexiones (estilo Meetup o Bumble BFF).</p>
-        </div>
-    </div>
-    <p style="margin-top:1rem; color:#8b949e; font-size:0.85rem">
-        Pero no te limités a estas. Pensá en algo que <em>a vos</em> te dé entusiasmo.
+        Para arrancar, acá van a trabajar sobre el proyecto escogido por cada grupo
     </p>
 </div>
 
@@ -157,8 +133,8 @@
         <a class="descarga" href="https://cdn.cs50.net/sql/2024/x/project/project.zip" target="_blank" rel="noopener">
             ⬇ Descargar plantillas (project.zip)
         </a>
-        <a class="ejemplo" href="https://cdn.cs50.net/sql/2024/x/project/sample-project.zip" target="_blank" rel="noopener">
-            ⬇ Descargar proyecto de ejemplo
+        <a class="ejemplo" href="https://github.com/jovanyvelez/sql_queries/tree/main/public/proyecto-ejemplo" target="_blank" rel="noopener">
+            ⬇ Ver un proyecto de ejemplo
         </a>
         <a class="origen" href="https://cs50.harvard.edu/sql/project/" target="_blank" rel="noopener">
             Ver enunciado original (Harvard) ↗
@@ -187,7 +163,7 @@ ls</code></pre>
         </div>
         <div class="pf-componente">
             <h4><code>schema.sql</code></h4>
-            <p>Conjunto de sentencias <code>CREATE TABLE</code>, <code>CREATE INDEX</code>, <code>CREATE VIEW</code>, etc. que componen el esquema de tu base de datos, anotadas con comentarios SQL.</p>
+            <p>Conjunto de sentencias <code>CREATE TABLE</code>, <code>CREATE INDEX</code>, etc. que componen el esquema de tu base de datos, anotadas con comentarios SQL.</p>
         </div>
         <div class="pf-componente">
             <h4><code>queries.sql</code></h4>
@@ -197,16 +173,16 @@ ls</code></pre>
 
     <h3>1. <code>DESIGN.md</code> — El documento de diseño</h3>
     <p>
-        Escribí sobre el propósito, el alcance, las entidades, las relaciones, las
-        optimizaciones y las limitaciones de tu base de datos. Escribí para un público
-        técnico que haya cursado algo como CS50 SQL. El objetivo es hacer visible tu
-        proceso de pensamiento.
+        Escribe sobre el propósito, el alcance, las entidades, las relaciones, las
+        optimizaciones y las limitaciones de tu base de datos. Escribe para un público
+        técnico que haya cursado algo similar a lo que vimos en base de datos. El objetivo es <em>hacer visible tu
+        proceso de pensamiento</em>.
     </p>
     <p>Debe incluir texto en todas las secciones que prescribe la plantilla, tener como
         mínimo varios párrafos de largo y explicar <em>por qué</em> tomaste ciertas
         decisiones de diseño. Un <code>DESIGN.md</code> de unas 1000 palabras suele ser
         suficiente. Si no llegás a ese umbral, probablemente tu proyecto no es lo
-        suficientemente complejo.</p>
+        suficientemente completo.</p>
 
     <h4>Diagrama entidad-relación</h4>
     <p>
@@ -223,20 +199,19 @@ ls</code></pre>
 
     <h4>Video de presentación</h4>
     <p>
-        Creá un video corto (máximo 3 minutos) en el que presentes tu proyecto al
+        Creá un video corto (máximo 5 minutos) en el que presentes tu proyecto al
         mundo: con diapositivas, capturas de pantalla, voz en off y/o acción en vivo.
         Tu video <strong>debe</strong> empezar con una sección que muestre:
     </p>
     <ul>
         <li>el título de tu proyecto</li>
-        <li>tu nombre</li>
-        <li>tus usuarios de GitHub y edX</li>
-        <li>tu ciudad y país</li>
+        <li>nombres de los integrantes del equipo</li>
+        <li>El repo de git en dónde quedó el proyecto</li>
+        <li>Tu institucion educativa</li>
         <li>la fecha en que grabaste el video</li>
     </ul>
     <p>
-        Subí el video a YouTube (o, si está bloqueado en tu país, un sitio similar) y
-        anotá la URL. Podés marcarlo como "no listado", pero no como "privado".
+        Sube el video a YouTube y anotá la URL. Podés marcarlo como "no listado", pero no como "privado".
     </p>
 
     <h3>2. <code>schema.sql</code> — El esquema</h3>
@@ -262,21 +237,21 @@ ls</code></pre>
     <h2>Proyecto de ejemplo</h2>
     <p>
         Si te sirve ver un ejemplo, el staff de Harvard hizo uno que crea una base de
-        datos para manejar estudiantes, instructores y entregas del propio curso CS50
-        SQL. Trae los tres archivos (<code>DESIGN.md</code>, <code>schema.sql</code> y
+        datos para manejar estudiantes, instructores y entregas del curso CS50
+        SQL. Este ejemplo trae los tres archivos (<code>DESIGN.md</code>, <code>schema.sql</code> y
         <code>queries.sql</code>) más un diagrama (<code>diagram.png</code>).
     </p>
     <div class="pf-links">
         <a class="ejemplo" href="https://cdn.cs50.net/sql/2024/x/project/sample-project.zip" target="_blank" rel="noopener">
             ⬇ Descargar proyecto de ejemplo (original, en inglés)
         </a>
-        <a class="descarga" href="/public/proyecto-ejemplo/DESIGN.md" target="_blank" rel="noopener">
+        <a class="descarga" href="https://github.com/jovanyvelez/sql_queries/blob/main/public/proyecto-ejemplo/DESIGN.md" target="_blank" rel="noopener">
             Ver DESIGN.md traducido
         </a>
-        <a class="descarga" href="/public/proyecto-ejemplo/schema.sql" target="_blank" rel="noopener">
+        <a class="descarga" href="https://github.com/jovanyvelez/sql_queries/blob/main/public/proyecto-ejemplo/schema.sql" target="_blank" rel="noopener">
             Ver schema.sql traducido
         </a>
-        <a class="descarga" href="/public/proyecto-ejemplo/queries.sql" target="_blank" rel="noopener">
+        <a class="descarga" href="https://github.com/jovanyvelez/sql_queries/blob/main/public/proyecto-ejemplo/queries.sql" target="_blank" rel="noopener">
             Ver queries.sql traducido
         </a>
     </div>
@@ -294,7 +269,7 @@ ls</code></pre>
 <!-- ── Cómo entregar ──────────────────────────────────────────────── -->
 <div class="pf-section">
     <h2>Cómo entregar</h2>
-    <p>En el curso oficial de Harvard hay tres pasos (formulario, <code>submit50</code> y gradebook). Para nuestra clase, la entrega será por el medio que indique el profe (GitHub Classroom, correo o plataforma del colegio).</p>
+    <p>Para nuestra clase, la entrega será por el medio de un repo de github</p>
     <p>Si querés seguir el flujo oficial de Harvard:</p>
     <pre><code>submit50 cs50/problems/2024/sql/project</code></pre>
     <div class="pf-links">
