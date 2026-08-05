@@ -30,8 +30,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="CS50 SQL — Adaptacion a PostgreSQL", lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/public", StaticFiles(directory="public"), name="public")
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")), name="static")
+# Monta /public solo si el directorio existe (en Vercel serverless el CWD
+# puede no ser el del proyecto y el directorio public/ puede no estar disponible).
+_public_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "public")
+if os.path.isdir(_public_dir):
+    app.mount("/public", StaticFiles(directory=_public_dir), name="public")
 
 app.include_router(clases.router, prefix="/clases")
 app.include_router(ejercicios.router, prefix="/ejercicios")

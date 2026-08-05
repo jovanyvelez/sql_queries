@@ -6,7 +6,7 @@ Video resumen: (Normalmente aquí habría una URL, ¡pero no para esta tarea de 
 
 ## Alcance
 
-La base de datos para CS50 SQL incluye todas las entidades necesarias para facilitar el proceso de seguimiento del progreso de los estudiantes y dejar comentarios sobre el trabajo de los estudiantes. Como tal, se incluye en el alcance de la base de datos:
+La base de datos para el proyecto incluye todas las entidades necesarias para facilitar el proceso de seguimiento del progreso de los estudiantes y dejar comentarios sobre el trabajo de los estudiantes. Como tal, se incluye en el alcance de la base de datos:
 
 * Estudiantes, incluyendo información básica de identificación
 * Instructores, incluyendo información básica de identificación
