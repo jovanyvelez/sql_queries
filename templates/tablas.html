@@ -118,6 +118,16 @@
     .fk-ref { font-size: 0.75rem; color: #8b949e; font-family: monospace; }
     .fk-ref::before { content: "→ "; color: #ffa657; }
 
+    /* Traducciones al español (en paréntesis, grises y cursivas) */
+    .traduccion {
+        font-size: 0.78rem; color: #8b949e; font-style: italic; font-weight: 400;
+        margin-left: 0.3rem; font-family: inherit;
+    }
+    .traduccion-col {
+        font-size: 0.74rem; color: #6e7681; font-style: italic; margin-left: 0.4rem;
+        display: block; margin-top: 0.1rem;
+    }
+
     .leyenda {
         display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;
         font-size: 0.78rem; color: #8b949e;
@@ -220,7 +230,7 @@ erDiagram
     <div class="card tabla-card" id="tabla-{{ grupo.id }}-{{ nombre|replace('.', '_') }}"
          data-tabla="{{ nombre|lower }}" data-grupo-id="{{ grupo.id }}">
         <div class="card-header" role="button" tabindex="0" aria-expanded="false" data-toggle>
-            <h3><span class="chevron">▸</span>{{ nombre }}</h3>
+            <h3><span class="chevron">▸</span>{{ nombre }}{% if grupo.es_pset and traducciones and nombre.split('.')[-1] in traducciones %} <span class="traduccion">({{ traducciones[nombre.split('.')[-1]] }})</span>{% endif %}</h3>
             <div class="tabla-meta">
                 <span class="meta-pill rows">{{ "{:,}".format(grupo.conteos.get(nombre, -1)).replace(",", ".") if grupo.conteos.get(nombre, -1) >= 0 else "—" }} filas</span>
                 <span class="meta-pill">{{ columnas | length }} columnas</span>
@@ -240,7 +250,7 @@ erDiagram
                     {% for col in columnas %}
                     <tr data-col="{{ (nombre ~ '.' ~ col.columna)|lower }}">
                         <td class="col-name" data-copy="{{ nombre }}.{{ col.columna }}" scope="row">
-                            <span class="col-label">{{ col.columna }}</span>
+                            <span class="col-label">{{ col.columna }}</span>{% if grupo.es_pset and traducciones_cols and col.columna in traducciones_cols %}<span class="traduccion-col">({{ traducciones_cols[col.columna] }})</span>{% endif %}
                             {% if col.es_pk %}<span class="badge-clave badge-pk" title="Clave primaria">PK</span>{% endif %}
                             {% if col.fk_ref %}<span class="badge-clave badge-fk" title="Clave foránea → {{ col.fk_ref }}">FK</span>{% endif %}
                             <span class="copy-hint">copiar</span>
@@ -337,8 +347,10 @@ erDiagram
             }
             // resaltar nombre de tabla en el header
             var hdrTitle = card.querySelector(".card-header h3");
-            // preservar el chevron
+            // preservar el chevron y la traducción (si la hay)
             var chev = hdrTitle.querySelector(".chevron");
+            var trad = hdrTitle.querySelector(".traduccion");
+            var tradHtml = trad ? trad.outerHTML : "";
             hdrTitle.innerHTML = "";
             var span = document.createElement("span");
             span.className = "chevron"; span.textContent = "▸";
@@ -346,6 +358,7 @@ erDiagram
             var label = document.createElement("span");
             hdrTitle.appendChild(label);
             highlight(label, tabla, q);
+            if (tradHtml) hdrTitle.insertAdjacentHTML("beforeend", tradHtml);
         });
         // filtrar chips
         chips.forEach(function (chip) {

@@ -203,7 +203,11 @@ async def tablas(request: Request, db: AsyncSession = Depends(get_db)):
     return templates.TemplateResponse(
         request,
         "tablas.html",
-        {"grupos": grupos},
+        {
+            "grupos": grupos,
+            "traducciones": TRADUCCIONES_TABLAS,
+            "traducciones_cols": TRADUCCIONES_COLUMNAS,
+        },
     )
 
 
@@ -223,6 +227,91 @@ TABLAS_ESTADISTICAS = [
     "autoria", "traduccion", "puntuaciones", "lista_larga",
     "leones_marinos", "migraciones",
 ]
+
+
+# Traducciones al español (para mostrar en paréntesis en /tablas).
+# SOLO para tablas de Problem Sets (las del curso ya están en español).
+TRADUCCIONES_TABLAS: dict[str, str] = {
+    # ── DESE
+    "districts": "distritos escolares",
+    "schools": "escuelas",
+    "graduation_rates": "tasas de graduación",
+    "expenditures": "gastos por estudiante",
+    "staff_evaluations": "evaluaciones de docentes",
+    # ── Moneyball
+    "players": "jugadores",
+    "teams": "equipos",
+    "salaries": "salarios",
+    "performances": "rendimientos (estadísticas por temporada)",
+    # ── Packages
+    "addresses": "direcciones",
+    "packages": "paquetes",
+    "drivers": "carteros (repartidores)",
+    "scans": "escaneos (registros de recogida/entrega)",
+}
+
+# Traducciones de columnas (clave = nombre de la columna tal como está en la BD).
+# Solo columnas de los Problem Sets que están en inglés o son poco claras.
+TRADUCCIONES_COLUMNAS: dict[str, str] = {
+    # ── genéricas de los psets
+    "id": "identificador",
+    "name": "nombre",
+    "type": "tipo",
+    "city": "ciudad",
+    "state": "estado (departamento)",
+    "zip": "código postal",
+    "address": "dirección",
+    "timestamp": "marca de tiempo (fecha y hora)",
+    "action": "acción (Pick=recoger, Drop=entregar)",
+    "contents": "contenido (qué hay adentro)",
+    "year": "año",
+    "salary": "salario (en dólares)",
+    "weight": "peso (libras)",
+    "height": "altura (pulgadas)",
+    "debut": "debut (primer juego en MLB)",
+    "final_game": "último juego",
+    "park": "estadio (parque)",
+    # ── DESE
+    "district_id": "id del distrito",
+    "school_id": "id de la escuela",
+    "graduated": "% que se graduó a tiempo",
+    "dropped": "% que desertó (se retiró)",
+    "excluded": "% excluido (expulsado)",
+    "pupils": "estudiantes matriculados",
+    "per_pupil_expenditure": "gasto por estudiante (dólares)",
+    "evaluated": "% de docentes evaluados",
+    "exemplary": "% evaluados como ejemplar",
+    "proficient": "% evaluados como competente",
+    "needs_improvement": "% que necesitan mejorar",
+    "unsatisfactory": "% evaluados como insatisfactorio",
+    # ── Moneyball
+    "player_id": "id del jugador",
+    "team_id": "id del equipo",
+    "first_name": "nombre",
+    "last_name": "apellido",
+    "bats": "batea (R=derecha, L=izquierda)",
+    "throws": "lanza (R=derecha, L=izquierda)",
+    "birth_year": "año de nacimiento",
+    "birth_month": "mes de nacimiento",
+    "birth_day": "día de nacimiento",
+    "birth_city": "ciudad de nacimiento",
+    "birth_state": "estado de nacimiento",
+    "birth_country": "país de nacimiento",
+    "g": "juegos jugados (games)",
+    "ab": "turnos al bate (at bats)",
+    "h": "hits (golpes válidos)",
+    "2B": "dobles (hits de 2 bases)",
+    "3B": "triples (hits de 3 bases)",
+    "hr": "jonrones (home runs)",
+    "rbi": "carreras impulsadas (runs batted in)",
+    "sb": "bases robadas (stolen bases)",
+    # ── Packages
+    "driver_id": "id del cartero",
+    "package_id": "id del paquete",
+    "address_id": "id de la dirección",
+    "from_address_id": "dirección de origen",
+    "to_address_id": "dirección de destino",
+}
 
 
 @app.get("/api/estadisticas")
